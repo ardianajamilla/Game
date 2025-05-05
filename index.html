@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crypto Miner Tycoon 3D - Isometrik</title> <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        button:disabled { opacity: 0.5; cursor: not-allowed; }
+        #canvas-container canvas { display: block; max-width: 100%; height: auto; }
+    </style>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+</head>
+<body class="bg-gray-900 text-gray-100 flex flex-col min-h-screen">
+
+    <header class="bg-gray-800 p-4 shadow-md sticky top-0 z-10">
+        <h1 class="text-xl font-bold text-center text-teal-400">Crypto Miner Tycoon 3D (Isometrik)</h1>
+    </header>
+
+    <main class="flex-grow container mx-auto p-4 flex flex-col space-y-6">
+
+        <div id="canvas-container" class="w-full h-64 md:h-96 bg-gray-700 rounded-lg shadow-inner overflow-hidden relative">
+            <div id="loading-indicator" class="absolute inset-0 flex items-center justify-center text-gray-400">
+                Memuat Model 3D...
+            </div>
+        </div>
+
+        <section id="stats-section" class="bg-gray-800 p-4 rounded-lg shadow-md">
+            <h2 class="text-lg font-semibold mb-3 text-teal-300">Statistik Rig</h2>
+            <div class="grid grid-cols-2 gap-4 text-sm md:text-base">
+                <div>
+                    <span class="font-medium text-gray-400 block">💰 Uang Virtual:</span>
+                    <span id="uang-virtual" class="font-bold text-lg text-yellow-400">0</span>
+                </div>
+                <div>
+                    <span class="font-medium text-gray-400 block">⚡ Hashrate Total:</span>
+                    <span id="total-hashrate" class="font-bold text-lg">0</span> H/s
+                </div>
+                <div>
+                    <span class="font-medium text-gray-400 block">🔌 Konsumsi Daya:</span>
+                    <span id="total-power" class="font-bold text-lg">0</span> W
+                </div>
+                <div>
+                    <span class="font-medium text-gray-400 block">🌡️ Suhu CPU:</span>
+                    <span id="suhu-cpu" class="font-bold text-lg">25</span> °C
+                </div>
+            </div>
+            <div id="throttling-status" class="mt-3 text-sm text-red-500 font-medium" style="display: none;">
+                🔥 PERINGATAN: Suhu terlalu tinggi! Performa menurun.
+            </div>
+        </section>
+
+        <section id="upgrade-section" class="bg-gray-800 p-4 rounded-lg shadow-md">
+            <h2 class="text-lg font-semibold mb-3 text-teal-300">Upgrade Komponen</h2>
+            <div class="flex flex-col space-y-4">
+                <button id="upgrade-cpu" class="w-full bg-teal-600 hover:bg-teal-700 text-white font-bold p-3 rounded-lg shadow transition duration-150 ease-in-out disabled:bg-gray-600">
+                    Upgrade CPU (Lvl <span id="level-cpu">1</span>) - Biaya: <span id="biaya-cpu">100</span>
+                </button>
+                <button id="upgrade-gpu" class="w-full bg-teal-600 hover:bg-teal-700 text-white font-bold p-3 rounded-lg shadow transition duration-150 ease-in-out disabled:bg-gray-600">
+                    Upgrade GPU (Lvl <span id="level-gpu">1</span>) - Biaya: <span id="biaya-gpu">150</span>
+                </button>
+                <button id="upgrade-pendingin" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold p-3 rounded-lg shadow transition duration-150 ease-in-out disabled:bg-gray-600">
+                    Upgrade Pendingin CPU (Lvl <span id="level-pendingin">1</span>) - Biaya: <span id="biaya-pendingin">80</span>
+                </button>
+            </div>
+        </section>
+
+        <section id="log-section" class="bg-gray-800 p-3 rounded-lg shadow-md">
+            <h3 class="text-md font-semibold mb-2 text-teal-300">Log Aktivitas</h3>
+            <div id="log-area" class="h-20 overflow-y-auto text-sm space-y-1 text-gray-300">
+                <p>Selamat datang di Crypto Miner Tycoon!</p>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="text-center text-xs text-gray-500 p-4 mt-6">
+        Prototipe Awal Isometrik - 2025
+    </footer>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://unpkg.com/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+
+    <script>
+        // ==========================================
+        // KONFIGURASI & STATE GAME AWAL
+        // ==========================================
+        const gameState = {
+            uangVirtual: 100,
+            komponen: {
+                cpu: { level: 1, suhu: 25 },
+                gpu: { level: 1, suhu: 25 },
+                pendingin: { level: 1 },
+                psu: { level: 1 }
+            },
+            maxTemp: 85,
+            isThrottling: false,
+            pendinginEffectiveness: 1,
+            suhuAmbient: 25
+        };
+
+        const tiers = {
+            cpu: [
+                { level: 1, hashrate: 10, power: 50, heat: 5 },
+                { level: 2, hashrate: 25, power: 70, heat: 8 },
+                { level: 3, hashrate: 60, power: 100, heat: 12 },
+            ],
+            gpu: [
+                { level: 1, hashrate: 20, power: 100, heat: 15 },
+                { level: 2, hashrate: 50, power: 150, heat: 25 },
+                { level: 3, hashrate: 120, power: 220, heat: 40 },
+            ],
+            pendingin: [
+                { level: 1, dissipation: 1.0 },
+                { level: 2, dissipation: 1.5 },
+                { level: 3, dissipation: 2.2 },
+            ],
+            psu: [
+                { level: 1, maxPower: 300 },
+                { level: 2, maxPower: 500 },
+            ]
+        };
+
+        const hargaUpgrade = {
+            cpu: { baseCost: 100, multiplier: 1.8 },
+            gpu: { baseCost: 150, multiplier: 2.0 },
+            pendingin: { baseCost: 80, multiplier: 1.6 }
+        };
+
+        function getCurrentTier(namaKomponen) {
+            const level = gameState.komponen[namaKomponen].level;
+            const tierData = tiers[namaKomponen].find(t => t.level === level);
+            return tierData || tiers[namaKomponen][tiers[namaKomponen].length - 1];
+        }
+
+        function getNextUpgradeCost(namaKomponen) {
+            const levelSaatIni = gameState.komponen[namaKomponen].level;
+            const config = hargaUpgrade[namaKomponen];
+            return Math.ceil(config.baseCost * Math.pow(config.multiplier, levelSaatIni -1));
+        }
+
+        // Variabel global Three.js
+        let scene, camera, renderer, controls;
+        let models = {};
+        // Tambahkan variabel untuk ukuran frustum kamera ortografik
+        let aspect, frustumSize = 15; // Ukuran area pandang vertikal, sesuaikan nilai ini untuk zoom awal
+
+        // ==========================================
+        // FUNGSI INTI GAME
+        // ==========================================
+
+        function init() {
+            console.log("Memulai inisialisasi game (Isometrik)...");
+            setupThreeJS();
+            createInitialModels();
+            updateUI();
+            setInterval(updateGameState, 1000);
+            animate();
+            setupEventListeners();
+            addLogMessage("Game berhasil dimuat. Mode Tampilan: Isometrik.");
+            console.log("Inisialisasi selesai.");
+        }
+
+        function updateGameState() {
+            const cpuTier = getCurrentTier('cpu');
+            const gpuTier = getCurrentTier('gpu');
+            const pendinginTier = getCurrentTier('pendingin');
+            let totalHashrate = cpuTier.hashrate + gpuTier.hashrate;
+            const totalPower = cpuTier.power + gpuTier.power;
+            const heatGenerated = cpuTier.heat + gpuTier.heat;
+            const heatDissipated = (gameState.komponen.cpu.suhu - gameState.suhuAmbient) * pendinginTier.dissipation * gameState.pendinginEffectiveness;
+            const deltaSuhu = heatGenerated - heatDissipated;
+            gameState.komponen.cpu.suhu += deltaSuhu * 0.05;
+            gameState.komponen.cpu.suhu = Math.max(gameState.suhuAmbient, gameState.komponen.cpu.suhu);
+
+            if (gameState.komponen.cpu.suhu > gameState.maxTemp) {
+                const overheatFactor = (gameState.komponen.cpu.suhu - gameState.maxTemp) / 10;
+                const throttleMultiplier = Math.max(0.1, 1 - overheatFactor);
+                totalHashrate *= throttleMultiplier;
+                gameState.isThrottling = true;
+                document.getElementById('throttling-status').style.display = 'block';
+            } else {
+                gameState.isThrottling = false;
+                 document.getElementById('throttling-status').style.display = 'none';
+            }
+
+            const profitPerDetik = totalHashrate * 0.001;
+            gameState.uangVirtual += profitPerDetik;
+            updateUI(totalHashrate, totalPower);
+        }
+
+        function upgradeComponent(namaKomponen) {
+            const biayaUpgrade = getNextUpgradeCost(namaKomponen);
+            const nextLevel = gameState.komponen[namaKomponen].level + 1;
+            const maxLevel = tiers[namaKomponen].length;
+
+            if (nextLevel > maxLevel) {
+                addLogMessage(`Komponen ${namaKomponen.toUpperCase()} sudah mencapai level maksimum!`, 'warning');
+                return;
+            }
+
+            if (gameState.uangVirtual >= biayaUpgrade) {
+                gameState.uangVirtual -= biayaUpgrade;
+                gameState.komponen[namaKomponen].level = nextLevel;
+                console.log(`Komponen ${namaKomponen} diupgrade ke level ${nextLevel}`);
+                if (namaKomponen === 'pendingin') {
+                    gameState.pendinginEffectiveness = getCurrentTier('pendingin').dissipation;
+                }
+                updateComponentModel3D(namaKomponen, nextLevel);
+                addLogMessage(`Upgrade ${namaKomponen.toUpperCase()} ke Lvl ${nextLevel} berhasil! (-$${biayaUpgrade.toFixed(0)})`, 'success');
+                updateUI();
+            } else {
+                addLogMessage(`Uang tidak cukup untuk upgrade ${namaKomponen.toUpperCase()}. Butuh $${biayaUpgrade.toFixed(0)}.`, 'error');
+            }
+        }
+
+        function updateUI(currentHashrate, currentPower) {
+            document.getElementById('uang-virtual').textContent = gameState.uangVirtual.toFixed(2);
+            const cpuTier = getCurrentTier('cpu');
+            const gpuTier = getCurrentTier('gpu');
+            const displayHashrate = currentHashrate !== undefined ? currentHashrate : (cpuTier.hashrate + gpuTier.hashrate);
+            const displayPower = currentPower !== undefined ? currentPower : (cpuTier.power + gpuTier.power);
+            document.getElementById('total-hashrate').textContent = displayHashrate.toFixed(1);
+            document.getElementById('total-power').textContent = displayPower.toFixed(0);
+            document.getElementById('suhu-cpu').textContent = gameState.komponen.cpu.suhu.toFixed(1);
+
+            ['cpu', 'gpu', 'pendingin'].forEach(comp => {
+                const level = gameState.komponen[comp].level;
+                const maxLevel = tiers[comp].length;
+                const btn = document.getElementById(`upgrade-${comp}`);
+                const levelSpan = document.getElementById(`level-${comp}`);
+                const biayaSpan = document.getElementById(`biaya-${comp}`);
+                levelSpan.textContent = level;
+                if (level < maxLevel) {
+                    const biaya = getNextUpgradeCost(comp);
+                    biayaSpan.textContent = biaya.toFixed(0);
+                    btn.disabled = gameState.uangVirtual < biaya;
+                    btn.childNodes[0].nodeValue = `Upgrade ${comp.charAt(0).toUpperCase() + comp.slice(1)} (Lvl ${level}) - Biaya: `;
+                } else {
+                    biayaSpan.textContent = "MAX";
+                    btn.disabled = true;
+                    btn.childNodes[0].nodeValue = `${comp.charAt(0).toUpperCase() + comp.slice(1)} Level Maksimum Tercapai `;
+                }
+            });
+        }
+
+        function addLogMessage(message, type = 'info') {
+            const logArea = document.getElementById('log-area');
+            const newMessage = document.createElement('p');
+            newMessage.textContent = message;
+            switch (type) {
+                case 'success': newMessage.className = 'text-green-400'; break;
+                case 'warning': newMessage.className = 'text-yellow-400'; break;
+                case 'error': newMessage.className = 'text-red-400'; break;
+                default: newMessage.className = 'text-gray-300';
+            }
+            logArea.appendChild(newMessage);
+            logArea.scrollTop = logArea.scrollHeight;
+            const maxLogs = 20;
+            if (logArea.children.length > maxLogs) {
+                logArea.removeChild(logArea.firstChild);
+            }
+        }
+
+        // ==========================================
+        // FUNGSI THREE.JS (dengan Kamera Ortografik)
+        // ==========================================
+
+        /**
+         * Setup scene, kamera (Ortografik), renderer, dan kontrol Three.js.
+         */
+        function setupThreeJS() {
+            const container = document.getElementById('canvas-container');
+            if (!container) {
+                console.error("Elemen #canvas-container tidak ditemukan!");
+                return;
+            }
+
+            // 1. Scene
+            scene = new THREE.Scene();
+            scene.background = new THREE.Color(0x2d3748); // bg-gray-800
+
+            // 2. Kamera (OrthographicCamera untuk tampilan isometrik)
+            aspect = container.clientWidth / container.clientHeight;
+            // Hitung batas frustum berdasarkan ukuran dan aspek rasio
+            const frustumHeight = frustumSize; // Tinggi area pandang
+            const frustumWidth = frustumHeight * aspect; // Lebar area pandang disesuaikan aspek rasio
+
+            camera = new THREE.OrthographicCamera(
+                frustumWidth / -2, // left
+                frustumWidth / 2,  // right
+                frustumHeight / 2, // top
+                frustumHeight / -2,// bottom
+                1,                 // near plane (lebih kecil dari jarak kamera)
+                1000               // far plane
+            );
+
+            // Posisikan kamera untuk sudut pandang isometrik
+            // Jarak yang sama pada X, Y, Z memberikan sudut isometrik klasik
+            const camDistance = 15; // Jarak kamera dari titik fokus, sesuaikan jika perlu
+            camera.position.set(camDistance, camDistance, camDistance);
+            // Atur kamera untuk melihat ke pusat scene atau sedikit di atas motherboard
+            const lookAtPosition = new THREE.Vector3(0, 1, 0); // Titik fokus (misal: tengah rig)
+            camera.lookAt(lookAtPosition);
+             // Penting: Panggil update setelah mengubah properti
+            camera.updateProjectionMatrix();
+
+
+            // 3. Renderer
+            renderer = new THREE.WebGLRenderer({ antialias: true });
+            renderer.setSize(container.clientWidth, container.clientHeight);
+            renderer.setPixelRatio(window.devicePixelRatio);
+            container.appendChild(renderer.domElement);
+            const loadingIndicator = document.getElementById('loading-indicator');
+            if (loadingIndicator) loadingIndicator.remove();
+
+            // 4. Pencahayaan (Mungkin perlu sedikit penyesuaian posisi directional light)
+            const ambientLight = new THREE.AmbientLight(0xcccccc, 0.7); // Sedikit lebih terang
+            scene.add(ambientLight);
+            const directionalLight = new THREE.DirectionalLight(0xffffff, 0.9); // Sedikit lebih terang
+            // Sesuaikan posisi lampu agar pencahayaan tetap baik dari sudut isometrik
+            directionalLight.position.set(10, 15, 10); // Lebih tinggi dan dari samping/atas
+            directionalLight.lookAt(lookAtPosition); // Arahkan ke titik fokus yang sama
+            scene.add(directionalLight);
+             // Opsional: Helper untuk visualisasi arah cahaya
+             // const lightHelper = new THREE.DirectionalLightHelper(directionalLight, 1);
+             // scene.add(lightHelper);
+
+
+            // 5. Kontrol Kamera (OrbitControls dengan Kamera Ortografik)
+            controls = new THREE.OrbitControls(camera, renderer.domElement);
+            controls.enableDamping = true;
+            controls.dampingFactor = 0.1;
+            // Dengan kamera ortografik, zoom tidak mengubah jarak, tapi skala frustum
+            // Rotasi mungkin terasa berbeda, panning tetap sama
+            // controls.enableRotate = false; // Uncomment baris ini jika ingin MENGUNCI rotasi (view isometrik tetap)
+            controls.screenSpacePanning = true; // Panning lebih intuitif
+            controls.target.copy(lookAtPosition); // Pastikan kontrol berputar di sekitar titik fokus yang benar
+            controls.update();
+
+            // 6. Responsivitas Canvas
+            window.addEventListener('resize', onWindowResize, false);
+        }
+
+        /**
+         * Membuat model 3D awal untuk semua komponen. (Tidak ada perubahan logika di sini)
+         */
+        function createInitialModels() {
+            const moboGeo = new THREE.BoxGeometry(6, 0.2, 4);
+            const moboMat = new THREE.MeshStandardMaterial({ color: 0x004d40 });
+            const motherboard = new THREE.Mesh(moboGeo, moboMat);
+            motherboard.position.y = 0;
+            scene.add(motherboard);
+            models['motherboard'] = motherboard;
+
+            updateComponentModel3D('cpu', gameState.komponen.cpu.level);
+            updateComponentModel3D('gpu', gameState.komponen.gpu.level);
+            updateComponentModel3D('pendingin', gameState.komponen.pendingin.level);
+        }
+
+        /**
+         * Menghapus model lama dan membuat model 3D baru untuk komponen. (Tidak ada perubahan logika di sini)
+         */
+        function updateComponentModel3D(namaKomponen, levelBaru) {
+            if (models[namaKomponen]) {
+                scene.remove(models[namaKomponen]);
+                 if (models[namaKomponen].geometry) models[namaKomponen].geometry.dispose();
+                 if (models[namaKomponen].material) {
+                    if (Array.isArray(models[namaKomponen].material)) {
+                        models[namaKomponen].material.forEach(material => material.dispose());
+                    } else {
+                        models[namaKomponen].material.dispose();
+                    }
+                 }
+                delete models[namaKomponen];
+            }
+
+            let geometry, material, mesh;
+            const position = { x: 0, y: 0.2, z: 0 }; // Posisi dasar Y di atas mobo
+            const scaleBase = 0.5;
+
+            switch (namaKomponen) {
+                 case 'cpu':
+                    position.x = -1.5;
+                    position.z = -0.5;
+                    const cpuSize = scaleBase * (1 + (levelBaru - 1) * 0.2);
+                    geometry = new THREE.BoxGeometry(cpuSize, 0.3, cpuSize);
+                    const cpuColors = [0x8d6e63, 0x795548, 0x5d4037];
+                    material = new THREE.MeshStandardMaterial({ color: cpuColors[levelBaru - 1] || cpuColors[cpuColors.length-1] });
+                    mesh = new THREE.Mesh(geometry, material);
+                    // Atur posisi Y agar dasar menempel di atas motherboard
+                    mesh.position.set(position.x, position.y + 0.3/2, position.z);
+                    break;
+
+                case 'gpu':
+                    position.x = 1.5;
+                    position.z = 0;
+                    const gpuLength = 1.5 * (1 + (levelBaru - 1) * 0.3);
+                    const gpuHeight = 0.6 * (1 + (levelBaru - 1) * 0.1);
+                    geometry = new THREE.BoxGeometry(0.5, gpuHeight, gpuLength);
+                    const gpuColors = [0x424242, 0x303030, 0x212121];
+                    material = new THREE.MeshStandardMaterial({ color: gpuColors[levelBaru - 1] || gpuColors[gpuColors.length-1], roughness: 0.7 });
+                    mesh = new THREE.Mesh(geometry, material);
+                    mesh.rotation.y = Math.PI / 2;
+                     // Atur posisi Y agar dasar menempel di atas motherboard
+                    mesh.position.set(position.x, position.y + gpuHeight/2, position.z);
+                    break;
+
+                case 'pendingin':
+                    position.x = -1.5;
+                    position.z = -0.5;
+                    const cpuBaseY = position.y + 0.3; // Posisi atas CPU
+
+                    if (levelBaru === 1) {
+                        geometry = new THREE.CylinderGeometry(0.3, 0.3, 0.2, 16);
+                        material = new THREE.MeshStandardMaterial({ color: 0xb0bec5 });
+                        mesh = new THREE.Mesh(geometry, material);
+                         // Atur posisi Y agar dasar menempel di atas CPU
+                        mesh.position.set(position.x, cpuBaseY + 0.2/2, position.z);
+                    } else if (levelBaru === 2) {
+                         geometry = new THREE.BoxGeometry(0.4, 0.8, 0.3);
+                         material = new THREE.MeshStandardMaterial({ color: 0x78909c });
+                         mesh = new THREE.Mesh(geometry, material);
+                         // Atur posisi Y agar dasar menempel di atas CPU
+                         mesh.position.set(position.x, cpuBaseY + 0.8/2, position.z);
+                    } else {
+                         geometry = new THREE.BoxGeometry(0.5, 1.2, 0.4);
+                         material = new THREE.MeshStandardMaterial({ color: 0x546e7a });
+                         mesh = new THREE.Mesh(geometry, material);
+                         // Atur posisi Y agar dasar menempel di atas CPU
+                         mesh.position.set(position.x, cpuBaseY + 1.2/2, position.z);
+                    }
+                    break;
+
+                default:
+                    console.warn("Nama komponen tidak dikenal:", namaKomponen);
+                    return;
+            }
+
+            scene.add(mesh);
+            models[namaKomponen] = mesh;
+        }
+
+        /**
+         * Loop render Three.js.
+         */
+        function animate() {
+            requestAnimationFrame(animate);
+            if (controls) controls.update(); // Update kontrol diperlukan jika damping aktif
+            renderer.render(scene, camera);
+        }
+
+        /**
+         * Menangani perubahan ukuran window untuk kamera ortografik.
+         */
+        function onWindowResize() {
+            const container = document.getElementById('canvas-container');
+             if (!container || !camera || !renderer) return; // Pastikan semua sudah diinisialisasi
+
+            const width = container.clientWidth;
+            const height = container.clientHeight;
+
+            // Update aspek rasio
+            aspect = width / height;
+
+            // Update batas frustum kamera ortografik agar skala tampilan tetap
+            // atau menyesuaikan dengan ukuran container
+            camera.left   = -frustumSize * aspect / 2;
+            camera.right  =  frustumSize * aspect / 2;
+            camera.top    =  frustumSize / 2;
+            camera.bottom = -frustumSize / 2;
+
+            // Penting: Perbarui matriks proyeksi kamera
+            camera.updateProjectionMatrix();
+
+            // Update ukuran renderer
+            renderer.setSize(width, height);
+        }
+
+
+        // ==========================================
+        // EVENT LISTENERS (Tidak berubah)
+        // ==========================================
+        function setupEventListeners() {
+            document.getElementById('upgrade-cpu').addEventListener('click', () => upgradeComponent('cpu'));
+            document.getElementById('upgrade-gpu').addEventListener('click', () => upgradeComponent('gpu'));
+            document.getElementById('upgrade-pendingin').addEventListener('click', () => upgradeComponent('pendingin'));
+        }
+
+        // ==========================================
+        // MULAI GAME SAAT DOM SIAP
+        // ==========================================
+        document.addEventListener('DOMContentLoaded', init);
+
+    </script>
+
+</body>
+</html>
