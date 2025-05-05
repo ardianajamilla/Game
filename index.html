@@ -3,33 +3,43 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Crypto Miner Tycoon - NEW UPDATE</title> {/* Judul Diubah */}
+    <title>Crypto Miner Tycoon - Full Features</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/@popperjs/core@2"></script>
     <script src="https://unpkg.com/tippy.js@6"></script>
     <style>
-        /* ... (CSS sama seperti sebelumnya) ... */
+        /* ... (CSS Sama seperti versi 15 level, mungkin perlu penyesuaian kecil untuk UI baru) ... */
          html, body { height: 100%; margin: 0; padding: 0; overflow: hidden; font-family: 'Inter', sans-serif; }
-         body { display: flex; flex-direction: column; background-color: #111827; }
+         body { display: flex; flex-direction: column; background-color: #111827; color: #d1d5db;}
+         /* ... (CSS lainnya sama) ... */
          #main-content-wrapper { display: flex; flex-direction: row; flex-grow: 1; height: calc(100% - 72px); overflow: hidden; }
          #left-panel { flex-grow: 1; height: 100%; position: relative; overflow: hidden; background-color: #374151; }
          #canvas-container { width: 100%; height: 100%; }
-         #right-panel { width: 350px; height: 100%; display: flex; flex-direction: column; background-color: #1f2937; border-left: 1px solid #4b5563; overflow-y: auto; }
+         #right-panel { width: 360px; /* Lebih lebar lagi untuk fitur baru */ height: 100%; display: flex; flex-direction: column; background-color: #1f2937; border-left: 1px solid #4b5563; overflow-y: auto; flex-shrink: 0;}
          #right-panel > section { background-color: #374151; margin: 0.75rem; padding: 0.75rem; border-radius: 0.5rem; box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.2), 0 1px 2px 0 rgba(0, 0, 0, 0.1); flex-shrink: 0; }
-         #log-section { flex-grow: 1; display: flex; flex-direction: column; }
+         #log-section { flex-grow: 1; display: flex; flex-direction: column; min-height: 100px; }
          #log-area { flex-grow: 1; overflow-y: auto; font-size: 0.75rem; padding-right: 4px; }
          #right-panel::-webkit-scrollbar, #log-area::-webkit-scrollbar { display: none; }
          #right-panel, #log-area { -ms-overflow-style: none; scrollbar-width: none; }
          button:disabled { opacity: 0.5; cursor: not-allowed; }
+         header { background-color: #1f2937; padding: 0.5rem; box-shadow: 0 1px 3px 0 rgba(0,0,0,.1), 0 1px 2px 0 rgba(0,0,0,.06); display: flex; justify-content: space-around; align-items: center; flex-shrink: 0; height: 72px; flex-wrap: nowrap; }
+         header > div { text-align: center; padding: 0 0.5rem; }
+         header .stat-label { font-size: .65rem; color: #9ca3af; display: block; line-height: 1.1; }
+         header .stat-value { font-weight: 700; font-size: .9rem; line-height: 1.2; margin-top: 1px; }
+         header .stat-unit { font-size: .65rem; }
+         header .warning-text { font-weight: 500; font-size: .65rem; }
          #xp-bar-container { background-color: #4b5563; border-radius: 9999px; overflow: hidden; height: 8px; margin-top: 2px; }
          #xp-bar { height: 100%; width: 0%; background: linear-gradient(to right, #34d399, #2dd4bf); transition: width 0.5s ease; border-radius: 9999px; }
          #temp-bar-container { background-color: #4b5563; border-radius: 0.25rem; overflow: hidden; height: 10px; margin-top: 4px; }
          #temp-bar { height: 100%; width: 0%; background-color: #34d399; transition: width 0.5s ease, background-color 0.5s ease; border-radius: 0.25rem; }
-         .temp-cool { color: #60a5fa; } .temp-warm { color: #fbbf24; } .temp-hot { color: #f87171; } .temp-overheat { color: #ef4444; font-weight: bold; animation: blink 1s linear infinite;}
-         @keyframes blink { 50% { opacity: 0.5; } }
-         .tippy-box[data-theme~='custom'] { background-color: #1f2937; color: #d1d5db; border: 1px solid #4b5563; font-size: 0.75rem; }
-         .tippy-arrow[data-theme~='custom'] { color: #1f2937; }
+         .temp-cool { color: #60a5fa; } .temp-warm { color: #fbbf24; } .temp-hot { color: #f87171; } .temp-overheat { color: #ef4444; font-weight: bold; animation: blink 1s linear infinite;} @keyframes blink { 50% { opacity: 0.5; } }
          .price-up { color: #10b981; } .price-down { color: #ef4444; } .price-stable { color: #6b7280; }
+         .tippy-box[data-theme~='custom'] { background-color: #1f2937; color: #d1d5db; border: 1px solid #4b5563; font-size: 0.75rem; } .tippy-arrow[data-theme~='custom'] { color: #1f2937; }
+         .contract-progress { background-color: #4b5563; border-radius: 0.25rem; overflow: hidden; height: 6px; margin-top: 2px; }
+         .contract-progress-bar { height: 100%; width: 0%; background-color: #a78bfa; /* violet-400 */ transition: width 0.5s ease; border-radius: 0.25rem;}
+         .event-active { animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
+         @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: .7; } }
+         @media (max-width: 768px) { /* ... (Media query sama) ... */ body { overflow-y: auto; height: auto; } header { height: auto; flex-wrap: wrap; padding: 0.5rem 0.25rem; justify-content: space-evenly; } header > div { margin-bottom: 0.25rem; } #main-content-wrapper { flex-direction: column; height: auto; } #left-panel { flex-grow: 0; width: 100%; height: 40vh; min-height: 250px; max-height: 350px; } #right-panel { flex-grow: 1; width: 100%; height: auto; max-height: none; border-left: none; border-top: 2px solid #4b5563; } #upgrade-section button span.component-name { font-size: 10px; } #upgrade-section button span.text-xs { font-size: 11px; } }
     </style>
      <link rel="preconnect" href="https://fonts.googleapis.com">
      <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -37,57 +47,101 @@
 </head>
 <body class="text-gray-100">
 
-    <header class="bg-gray-800 p-3 shadow-md flex justify-around items-center h-18" style="flex-shrink: 0;">
-        {/* ... Konten Header ... */}
-         <div class="text-center px-2"><span class="text-xs text-gray-400 block">⭐ Level</span><span id="player-level" class="font-bold text-lg text-cyan-400">1</span><div id="xp-bar-container"><div id="xp-bar"></div></div><span id="player-xp-text" class="text-xs text-gray-500">0 / 100 XP</span></div>
-         <div class="text-center border-l border-gray-600 px-3"><span class="text-xs text-gray-400 block">💰 Uang</span><span id="uang-virtual" class="font-bold text-lg text-yellow-400">0</span></div>
-         <div class="text-center border-l border-gray-600 px-3"><span class="text-xs text-gray-400 block">⛏️ BTC</span><span id="mined-btc" class="font-bold text-lg text-orange-400">0.00000</span> <span class="text-xs">BTC</span></div>
-         <div class="text-center border-l border-r border-gray-600 px-3 flex space-x-3"><div><span class="text-xs text-gray-400 block">⚙️ Tech</span><span id="tech-coin" class="font-bold text-lg text-sky-400">0</span></div><div><span class="text-xs text-gray-400 block">💎 Rare</span><span id="rare-coin" class="font-bold text-lg text-fuchsia-400">0</span></div></div>
-         <div class="text-center border-r border-gray-600 px-3"><span class="text-xs text-gray-400 block">⚡ Hashrate</span><span id="total-hashrate" class="font-bold text-lg">0</span> <span class="text-xs">H/s</span></div>
-         <div class="text-center px-2"><span class="text-xs text-gray-400 block">🌡️ Suhu CPU</span><span id="suhu-cpu" class="font-bold text-lg temp-cool">25</span> <span class="text-xs">°C</span><div id="temp-bar-container"><div id="temp-bar"></div></div></div>
-         <div class="text-center border-l border-gray-600 pl-3 pr-1"><span class="text-xs text-gray-400 block">🔌 Daya</span><span id="total-power" class="font-bold text-lg">0</span><span class="text-xs">/</span><span id="max-power" class="font-bold text-lg text-gray-300">300</span><span class="text-xs">W</span></div>
-         <div class="flex flex-col items-start pl-1"><div id="power-warning" class="text-red-500 font-medium text-xs" style="display: none;">⚡OVERLOAD!</div><div id="throttling-status" class="text-red-500 font-medium text-xs" style="display: none;">🔥OVERHEAT!</div></div>
+    <header>
+         {/* */} <div class="px-1"><span class="stat-label">⭐ Level</span><span id="player-level" class="stat-value text-cyan-400">1</span><div id="xp-bar-container"><div id="xp-bar"></div></div><span id="player-xp-text" class="text-[10px] text-gray-500">0/100 XP</span></div>
+         {/* */} <div class="border-l border-gray-600 px-2"><span class="stat-label">💰 Uang</span><span id="uang-virtual" class="stat-value text-yellow-400">0</span></div>
+         {/* */} <div class="border-l border-gray-600 px-2 text-xs"> <span class="stat-label">⛏️ Kripto (Unprocessed)</span> <div class="flex justify-center space-x-2 mt-1"> <div><span class="font-bold text-orange-400" id="mined-btc">0.00</span> <span class="text-gray-400">BTC</span></div> <div><span class="font-bold text-blue-400" id="mined-eth">0.00</span> <span class="text-gray-400">ETH</span></div> <div><span class="font-bold text-yellow-500" id="mined-doge">0.00</span> <span class="text-gray-400">DOGE</span></div> </div> </div>
+         {/* */} <div class="border-l border-r border-gray-600 px-2 flex space-x-2"><div><span class="stat-label">⚙️ Tech</span><span id="tech-coin" class="stat-value text-sky-400">0</span></div><div><span class="stat-label">💎 Rare</span><span id="rare-coin" class="stat-value text-fuchsia-400">0</span></div></div>
+         {/* */} <div class="border-r border-gray-600 px-2"><span class="stat-label">⚡ Hashrate</span><span id="total-hashrate" class="stat-value">0</span> <span class="stat-unit">H/s</span></div>
+         {/* */} <div class="px-1"><span class="stat-label">🌡️ Suhu CPU</span><span id="suhu-cpu" class="stat-value temp-cool">25</span> <span class="stat-unit">°C</span><div id="temp-bar-container"><div id="temp-bar"></div></div></div>
+         {/* */} <div class="border-l border-gray-600 pl-2 pr-1"><span class="stat-label">🔌 Daya</span><span id="total-power" class="stat-value">0</span><span class="stat-unit">/</span><span id="max-power" class="stat-value text-gray-300">300</span><span class="stat-unit">W</span> <div id="electricity-cost" class="text-[10px] text-red-400">Cost: $0.00/s</div></div>
+         {/* */}
+         <div class="flex flex-col items-start pl-1 text-center">
+             <div id="active-event" class="text-xs font-semibold text-lime-400 event-active" style="display: none;">EVENT!</div>
+             <div id="power-warning" class="warning-text text-red-500" style="display: none;">⚡OVERLOAD!</div>
+             <div id="throttling-status" class="warning-text text-red-500" style="display: none;">🔥OVERHEAT!</div>
+         </div>
     </header>
 
     <div id="main-content-wrapper">
-        <div id="left-panel">
-            <div id="canvas-container">
-                 <div id="loading-indicator" style="position:absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: #cbd5e0;">Memuat...</div>
-            </div>
-        </div>
+        {/* */} <div id="left-panel"><div id="canvas-container"><div id="loading-indicator" style="position:absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: #cbd5e0;">Memuat...</div></div></div>
 
+        {/* */}
         <aside id="right-panel">
-            <section id="exchange-section"> /* ... */
-                 <h3 class="text-md font-semibold mb-2 text-teal-300 border-b border-gray-600 pb-1">Exchange BTC</h3>
-                 <div class="text-sm my-2 flex justify-between items-center"><span>Rate: 1 BTC =</span><span class="font-semibold text-yellow-300">$<span id="exchange-rate">50000</span><span id="price-trend" class="ml-1 price-stable">→</span></span></div>
-                 <div class="my-2"><span class="text-sm text-gray-300">Available: </span><span id="exchange-available-btc" class="font-bold text-orange-400">0.00000</span> <span class="text-xs">BTC</span></div>
-                 <button id="exchange-button" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold p-2 rounded-lg shadow text-sm transition duration-150 ease-in-out disabled:bg-gray-500">Tukar Semua</button>
-             </section>
-
-            <section id="upgrade-section">
-                 <h3 class="text-md font-semibold mb-3 text-teal-300 border-b border-gray-600 pb-1">Upgrade Rig</h3>
-                {/* Tombol Upgrade */}
-                 <div class="grid grid-cols-2 gap-3">
-                     <button id="upgrade-cpu" data-tippy-content="Upgrade ke: ?" class="bg-teal-600 hover:bg-teal-700 text-white font-bold p-2 rounded-lg shadow text-xs transition duration-150 ease-in-out disabled:bg-gray-500 flex flex-col items-center justify-center h-16"><span class="block text-center text-[11px] leading-tight component-name">CPU Name (Lvl 1)</span><span class="mt-1 text-yellow-300 block text-xs">$<span id="biaya-cpu">100</span></span></button>
-                     <button id="upgrade-gpu" data-tippy-content="Upgrade ke: ?" class="bg-teal-600 hover:bg-teal-700 text-white font-bold p-2 rounded-lg shadow text-xs transition duration-150 ease-in-out disabled:bg-gray-500 flex flex-col items-center justify-center h-16"><span class="block text-center text-[11px] leading-tight component-name">GPU Name (Lvl 1)</span><span class="mt-1 text-yellow-300 block text-xs">$<span id="biaya-gpu">150</span></span></button>
-                     <button id="upgrade-pendingin" data-tippy-content="Upgrade ke: ?" class="bg-blue-600 hover:bg-blue-700 text-white font-bold p-2 rounded-lg shadow text-xs transition duration-150 ease-in-out disabled:bg-gray-500 flex flex-col items-center justify-center h-16"><span class="block text-center text-[11px] leading-tight component-name">Cooler Name (Lvl 1)</span><span class="mt-1 text-yellow-300 block text-xs">$<span id="biaya-pendingin">80</span></span></button>
-                     <button id="upgrade-psu" data-tippy-content="Upgrade ke: ?" class="bg-purple-600 hover:bg-purple-700 text-white font-bold p-2 rounded-lg shadow text-xs transition duration-150 ease-in-out disabled:bg-gray-500 flex flex-col items-center justify-center h-16"><span class="block text-center text-[11px] leading-tight component-name">PSU Name (Lvl 1)</span><span class="mt-1 text-yellow-300 block text-xs">$<span id="biaya-psu">120</span></span></button>
+            {/* */}
+            <section id="market-section">
+                 <h3 class="text-md font-semibold mb-2 text-teal-300 border-b border-gray-600 pb-1">Pasar Kripto</h3>
+                 <div class="space-y-2 text-sm">
+                     {/* */} <div class="flex justify-between items-center"><span>BTC Rate:</span><span class="font-semibold text-orange-400">$<span id="rate-btc">50000</span><span id="trend-btc" class="ml-1 price-stable">→</span></span><button onclick="exchangeCrypto('btc')" class="ml-2 px-2 py-0.5 text-xs bg-orange-500 hover:bg-orange-600 rounded disabled:bg-gray-500 exchange-btn">Tukar</button></div>
+                     {/* */} <div class="flex justify-between items-center"><span>ETH Rate:</span><span class="font-semibold text-blue-400">$<span id="rate-eth">3000</span><span id="trend-eth" class="ml-1 price-stable">→</span></span><button onclick="exchangeCrypto('eth')" class="ml-2 px-2 py-0.5 text-xs bg-blue-500 hover:bg-blue-600 rounded disabled:bg-gray-500 exchange-btn">Tukar</button></div>
+                     {/* */} <div class="flex justify-between items-center"><span>DOGE Rate:</span><span class="font-semibold text-yellow-500">$<span id="rate-doge">0.15</span><span id="trend-doge" class="ml-1 price-stable">→</span></span><button onclick="exchangeCrypto('doge')" class="ml-2 px-2 py-0.5 text-xs bg-yellow-500 hover:bg-yellow-600 rounded disabled:bg-gray-500 exchange-btn">Tukar</button></div>
                  </div>
             </section>
 
-             <section id="customize-section"> /* ... */
-                   <h3 class="text-md font-semibold mb-3 text-teal-300 border-b border-gray-600 pb-1">Kustomisasi</h3>
-                   <div class="text-sm mb-2">Warna Karakter:</div><div class="flex space-x-2 mb-3"><button class="w-6 h-6 rounded-full bg-blue-300 border border-gray-400" onclick="changeCharacterColor(0xADD8E6)"></button><button class="w-6 h-6 rounded-full bg-pink-300 border border-gray-400" onclick="changeCharacterColor(0xFFB6C1)"></button><button class="w-6 h-6 rounded-full bg-green-300 border border-gray-400" onclick="changeCharacterColor(0x90EE90)"></button><button class="w-6 h-6 rounded-full bg-gray-400 border border-gray-400" onclick="changeCharacterColor(0xAAAAAA)"></button></div>
-                   <div class="text-sm mb-2">Warna Meja:</div><div class="flex space-x-2"><button class="w-6 h-6 rounded-full bg-yellow-700 border border-gray-400" onclick="changeDeskColor(0x8B4513)"></button><button class="w-6 h-6 rounded-full bg-gray-800 border border-gray-400" onclick="changeDeskColor(0x2F4F4F)"></button><button class="w-6 h-6 rounded-full bg-white border border-gray-400" onclick="changeDeskColor(0xFFFFFF)"></button></div>
+            {/* */}
+            <section id="upgrade-overclock-section">
+                  <h3 class="text-md font-semibold mb-3 text-teal-300 border-b border-gray-600 pb-1">Upgrade & Overclock</h3>
+                  <div class="grid grid-cols-2 gap-3 mb-3">
+                     {/* */}
+                      <button id="upgrade-cpu" data-tippy-content="Upgrade ke: ?" class="bg-teal-600 hover:bg-teal-700 text-white font-bold p-2 rounded-lg shadow text-xs transition duration-150 ease-in-out disabled:bg-gray-500 flex flex-col items-center justify-center h-16"><span class="block text-center text-[11px] leading-tight component-name">CPU Name (Lvl 1)</span><span class="mt-1 text-yellow-300 block text-xs">$<span id="biaya-cpu">100</span></span></button>
+                      <button id="upgrade-gpu" data-tippy-content="Upgrade ke: ?" class="bg-teal-600 hover:bg-teal-700 text-white font-bold p-2 rounded-lg shadow text-xs transition duration-150 ease-in-out disabled:bg-gray-500 flex flex-col items-center justify-center h-16"><span class="block text-center text-[11px] leading-tight component-name">GPU Name (Lvl 1)</span><span class="mt-1 text-yellow-300 block text-xs">$<span id="biaya-gpu">150</span></span></button>
+                      <button id="upgrade-pendingin" data-tippy-content="Upgrade ke: ?" class="bg-blue-600 hover:bg-blue-700 text-white font-bold p-2 rounded-lg shadow text-xs transition duration-150 ease-in-out disabled:bg-gray-500 flex flex-col items-center justify-center h-16"><span class="block text-center text-[11px] leading-tight component-name">Cooler Name (Lvl 1)</span><span class="mt-1 text-yellow-300 block text-xs">$<span id="biaya-pendingin">80</span></span></button>
+                      <button id="upgrade-psu" data-tippy-content="Upgrade ke: ?" class="bg-purple-600 hover:bg-purple-700 text-white font-bold p-2 rounded-lg shadow text-xs transition duration-150 ease-in-out disabled:bg-gray-500 flex flex-col items-center justify-center h-16"><span class="block text-center text-[11px] leading-tight component-name">PSU Name (Lvl 1)</span><span class="mt-1 text-yellow-300 block text-xs">$<span id="biaya-psu">120</span></span></button>
+                  </div>
+                  <div class="flex space-x-2">
+                      {/* */}
+                      <button id="overclock-cpu" onclick="toggleOverclock('cpu')" class="flex-1 bg-red-600 hover:bg-red-700 text-white text-xs font-bold p-1 rounded disabled:bg-gray-500">OC CPU</button>
+                      <button id="overclock-gpu" onclick="toggleOverclock('gpu')" class="flex-1 bg-red-600 hover:bg-red-700 text-white text-xs font-bold p-1 rounded disabled:bg-gray-500">OC GPU</button>
+                  </div>
+                   <div id="overclock-status" class="text-xs text-center mt-1 text-red-400"></div>
              </section>
 
-            <section id="log-section"> /* ... */
-                  <h3 class="text-md font-semibold mb-2 text-teal-300 border-b border-gray-600 pb-1 flex-shrink-0">Log Aktivitas</h3>
-                  <div id="log-area"><p>Game dimuat. Selamat menambang!</p></div>
-            </section>
+             {/* */}
+             <section id="booster-section">
+                  <h3 class="text-md font-semibold mb-2 text-teal-300 border-b border-gray-600 pb-1">Boosters</h3>
+                  <div class="grid grid-cols-3 gap-2 text-center text-xs">
+                      <div>
+                          <button id="activate-hashBoost" onclick="activateBooster('hashBoost')" class="w-full p-1 bg-emerald-600 hover:bg-emerald-700 rounded disabled:bg-gray-500">⚡️ Hash</button>
+                          <span class="text-gray-400">(<span id="count-hashBoost">0</span>)</span>
+                      </div>
+                      <div>
+                           <button id="activate-coolingBoost" onclick="activateBooster('coolingBoost')" class="w-full p-1 bg-sky-600 hover:bg-sky-700 rounded disabled:bg-gray-500">❄️ Cool</button>
+                           <span class="text-gray-400">(<span id="count-coolingBoost">0</span>)</span>
+                      </div>
+                      <div>
+                           <button id="activate-powerBoost" onclick="activateBooster('powerBoost')" class="w-full p-1 bg-indigo-600 hover:bg-indigo-700 rounded disabled:bg-gray-500">🔌 Power</button>
+                           <span class="text-gray-400">(<span id="count-powerBoost">0</span>)</span>
+                      </div>
+                  </div>
+                  <div id="active-boosters-status" class="text-xs text-center mt-1 text-lime-400"></div>
+             </section>
+
+             {/* */}
+             <section id="contract-section">
+                  <h3 class="text-md font-semibold mb-2 text-teal-300 border-b border-gray-600 pb-1">Kontrak Aktif</h3>
+                  <div id="contract-details" class="text-xs space-y-1">
+                      <p id="contract-desc">Tidak ada kontrak aktif.</p>
+                      <div id="contract-progress-container" class="contract-progress" style="display: none;"><div id="contract-progress-bar" class="contract-progress-bar"></div></div>
+                      <p id="contract-reward"></p>
+                      <button id="contract-claim-btn" onclick="claimContractReward()" class="mt-1 w-full text-xs bg-yellow-600 hover:bg-yellow-700 rounded p-1 disabled:bg-gray-500" disabled>Klaim Hadiah</button>
+                  </div>
+             </section>
+
+            {/* */}
+             <section id="achievements-section">
+                 <h3 class="text-md font-semibold mb-2 text-teal-300 border-b border-gray-600 pb-1">Pencapaian</h3>
+                 <div class="text-xs space-y-1" id="achievements-list">
+                     {/* */}
+                     <p>Loading...</p>
+                 </div>
+             </section>
+
+             {/* */} <section id="customize-section"> /* ... */ <h3 class="text-md font-semibold mb-3 text-teal-300 border-b border-gray-600 pb-1">Kustomisasi</h3><div class="text-sm mb-2">Warna Karakter:</div><div class="flex space-x-2 mb-3"><button class="w-6 h-6 rounded-full bg-blue-300 border border-gray-400" onclick="changeCharacterColor(0xADD8E6)"></button><button class="w-6 h-6 rounded-full bg-pink-300 border border-gray-400" onclick="changeCharacterColor(0xFFB6C1)"></button><button class="w-6 h-6 rounded-full bg-green-300 border border-gray-400" onclick="changeCharacterColor(0x90EE90)"></button><button class="w-6 h-6 rounded-full bg-gray-400 border border-gray-400" onclick="changeCharacterColor(0xAAAAAA)"></button></div><div class="text-sm mb-2">Warna Meja:</div><div class="flex space-x-2"><button class="w-6 h-6 rounded-full bg-yellow-700 border border-gray-400" onclick="changeDeskColor(0x8B4513)"></button><button class="w-6 h-6 rounded-full bg-gray-800 border border-gray-400" onclick="changeDeskColor(0x2F4F4F)"></button><button class="w-6 h-6 rounded-full bg-white border border-gray-400" onclick="changeDeskColor(0xFFFFFF)"></button></div></section>
+            {/* */} <section id="log-section"> /* ... */ <h3 class="text-md font-semibold mb-2 text-teal-300 border-b border-gray-600 pb-1 flex-shrink-0">Log Aktivitas</h3><div id="log-area"><p>Game dimuat. Selamat menambang!</p></div></section>
         </aside>
     </div>
 
+    {/* */}
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://unpkg.com/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
     <script src="https://unpkg.com/@popperjs/core@2"></script>
@@ -95,127 +149,624 @@
 
     <script>
         // ==========================================
-        // GAME STATE & CONFIG
+        // GAME STATE & CONFIG - FITUR BARU
         // ==========================================
-        const gameState = { /* ... (State sama, sesuaikan rate inflasi jika perlu) ... */
-             uangVirtual: 100, minedBTC: 0, btcExchangeRate: 50000, baseExchangeRate: 50000, rateVolatility: 0.15, rateNoise: 0.03, rateTime: 0, lastRate: 50000, rateUpdateInterval: 5000, lastRateUpdateTime: 0, inflationMultiplier: 1.0, inflationRatePerMinute: 0.003, /* Inflasi sedikit lebih lambat */ lastInflationUpdateTime: 0, playerLevel: 1, playerXP: 0, xpToNextLevel: 100, otherCoins: { techCoin: 0, rareCoin: 0 }, komponen: { cpu: { level: 1, suhu: 25 }, gpu: { level: 1, suhu: 25 }, pendingin: { level: 1 }, psu: { level: 1 } }, maxTemp: 85, isThrottling: false, isPowerOverload: false, pendinginEffectiveness: 1, suhuAmbient: 25, hashToBtcRate: 0.000001, xpPerUangExchanged: 0.05
-         };
-
-        // --- NAMA KOMPONEN (50 per jenis) ---
-        const componentNames = {
-            cpu: [ "Atom Core Basic", "ByteCruncher II", "Silicon Logic C-Series", "HexaCore Starter", "Zenith Compute 5", "Quantum Leap QL-100", "NovaChip Proxima", "Aether Processor 7X", "Chronos Engine CE-3000", "Hyperion Core H9", "Galactic Mind GM-Ultra", "Singularity Chip S1", "Nebula Processing Unit (NPU)", "RiftWalker Xtreme", "Omega Vertex Prime", "Neural Net Weaver NX-1", "AI Cognition Core C2", "Bio-Integrated Logic Unit (BILU)", "Psionic Field Processor PFP-Alpha", "Chrono-Synclastic Infundibulum", "Warp Core Stabilizer WCS-Delta", "Nexus Brain NB-7000", "Apex Computational Engine ACE-X", "Sentient Silicon SS-Mark II", "Reality Fabric Loom RFL-01", "Subspace Thought Matrix STM-9", "Dimensional Gate Processor DGP-Zeta", "Causal Loop Optimizer CLO-Prime", "Echo Core Harmonizer ECH-X12", "Void Logic Construct VLC-Omega", "Hyper-Dimensional Array HDA-50", "Quantum Entanglement CPU (QE-CPU)", "Singularity Function Core SFC-Final", "Temporal Flux Processor TFP-99", "Zero-Point Computation Node ZPCN", "Akashic Record Access Chip ARAC", "Collective Unconscious Interface CUI-1", "Meta-Cognitive Processor MCP-X", "Reality Pattern Engine RPE-Max", "Universal Constructor UC-01", "Omega Point Processor OPP-Finality", "Hyper-Causal Determinant HCD", "Architect Mind Core AMC-Zero", "Logic Weaver Prime LWP", "Sentience Hub SH-Ultimate", "God-Machine Interface GMI-00", "Reality Core RC-Absolute", "The Oracle Engine", "Nexus of All Thought", "The Final Computation" ],
-            gpu: [ "PixelFlow Lite", "RenderMax R1", "Vector Prime V-200", "ShaderStorm SSX", "CryptoHash CH-50", "RayWeaver Pro", "Matrix Engine ME-750", "Photon Blaster PB-900X", "DeepMine DM-Elite", "TerraHash T-Rex", "VoidRender VR-Ultimate", "Quantum Graphics QG-Titan", "Celestial Forge CF-Max", "WarpDrive WD-Extreme", "Infinity Matrix IM-Omega", "Crypto-Flux Condenser CFC-9000", "Hash Ripper HR-Xtreme", "Dimensional Shader DS-Alpha", "Light Bender LB-Pro Max", "Reality Canvas RC-Elite", "Subspace Miner SM-Ultra", "Quantum Hash Generator QHG-1", "Aetherium Filter AF-77", "Chrono-Miner CM-X", "Singularity Hash Unit SHU-Prime", "Void Particle Accelerator VPA-Hash", "Photon Stream Miner PSM-X10", "Entropy Reversal Engine (Mining)", "Celestial Hash Array CHA-Max", "Warp Field Miner WFM-Omega", "Zero-Point Hash Extractor ZPHE", "Reality Algorithm Solver RAS-9", "Hyper-Dimensional Render HDR-Final", "Quantum Foam Stabilizer (Mining)", "Meta-Material Hash Core MMHC", "Universal Ledger Access ULA-X", "Crypto-Dimensional Key CDK-Prime", "The Hash Oracle", "Reality Mining Engine RME-Max", "Void Currency Generator VCG-01", "Omega Hash Condenser OHC", "Architect Mining Array AMA-Zero", "Infinite Hash Stream IHS", "Reality Forge RF-Crypto", "The Ledger Locksmith", "God-Hand Mining Unit GMU", "Absolute Hash Rate AHR-Device", "The Crypto Singularity", "Nexus of Digital Wealth", "The Final Hash" ],
-            cooler: [ "AeroFlow Basic Fan", "CoolBreeze Tower S", "IceWind Heatsink Pro", "Arctic Chill AC-120", "Vortex Liquid V L-240", "CryoStream CS-360 Elite", "SubZero Module SZ-1", "ThermoGuard TG-X", "FrostByte Integrated Loop", "HydroChill MaxFlow", "Glacial Core GC-Pro", "Zephyr Cooling System ZCS", "Avalanche Direct Die", "Nimbus Immersion Unit", "Absolute Zero Engine AZE", "Phase Change Injector PCI-Mark II", "Quantum Tunneling Cooler QTC-1", "Zero-Point Energy Sink ZPES", "Cryo-Stasis Field Generator CSF-Alpha", "Atmospheric Heat Exchanger AHX-Industrial", "Geo-Thermal Vent Cooler GTVC-1", "Subspace Heat Displacement Unit SHDU", "Void Cooling Matrix VCM-Elite", "Entropy Reduction System ERS-Pro", "Chrono-Freeze Module CFM-X", "Plasma Coolant Loop PCL-9000", "Hyper-Conductive Lattice HCL-Max", "Singularity Heat Nullifier SHN-1", "Quantum Foam Thermal Regulator QFTR", "Temporal Stasis Cooler TSC-Omega", "Absolute Entropy Annihilator AEA", "Dimensional Heat Siphon DHS-Pro", "Celestial Ice Core CIC-Max", "Warp Core Coolant Injector WCCI", "Zero Kelvin Generator ZKG-Final", "Akashic Thermal Regulator ATR", "Void Energy Dissipator VED-X", "Meta-Stable Coolant MSC-Prime", "Reality Thermal Stabilizer RTS-Max", "Universal Heat Sink UHS-01", "Omega Freeze OF-System", "Hyper-Spatial Cooler HSC", "Architect Thermal Control ATC-Zero", "Cryo-Dimension Stabilizer CDS", "The Heat Death Inhibitor", "God-Tier Cooling Array GTCA", "Absolute Zero Field AZF", "The Entropy Engine", "Nexus of Cold", "The Final Chill" ],
-            psu: [ "Volt Basic 300W", "PowerBrick Bronze 550W", "StableWatt Silver 750W", "JuiceBox Gold 850W", "EnergyCore Platinum 1000W", "Ampere Reactor AR-1200 Titanium", "PowerForge PF-1600 Pro", "Electron Stream ES-Max", "Quantum Grid QG-2000", "Dynamo Engine DE-Ultra", "Fusion Power Module FPM", "Stellar Core SC-Xtreme", "PowerMatrix PM-Industrial", "Singularity Conduit SC-Omega", "Infinite Current Engine ICE", "Zero-Point Energy Tap ZPET-1", "Antimatter Reactor Core ARC-Alpha", "Dyson Sphere Link DSL-Micro", "Void Energy Converter VEC-Pro", "Quantum Fluctuation Rectifier QFR", "Chrono-Energy Accumulator CEA-X", "Subspace Power Relay SPR-9000", "Plasma Fusion Generator PFG-Elite", "Hyper-Dimensional Capacitor HDC-Max", "Singularity Power Source SPS-Prime", "Entropy Drive ED-Power", "Celestial Energy Forge CEF-Ultra", "Warp Core Power Tap WCPT-1", "Reality Energy Matrix REM-Omega", "Temporal Power Conduit TPC-Final", "Absolute Energy Generator AEG", "Dimensional Power Siphon DPS-X", "Quantum Grid Stabilizer QGS-Max", "Zero-Point Field Modulator ZPFM", "Meta-Energy Transducer MET-Prime", "Akashic Energy Channel AEC", "Void Power Well VPW-01", "Universal Power Core UPC-X", "Reality Power Plant RPP-Max", "Omega Grid OG-Interface", "Hyper-Spatial Energy Node HSEN", "Architect Power System APS-Zero", "Infinite Energy Loop IEL", "Reality Energy Forge REF", "The Power Singularity", "God-Machine Power Core GMPC", "Absolute Power Source APS-Final", "The Energy Nexus", "Source of All Power", "The Final Watt" ]
+        const gameState = {
+            uangVirtual: 1000, // Modal awal lebih besar?
+            // Kripto & Market
+            minedBTC: 0, minedETH: 0, minedDOGE: 0,
+            rates: { btc: 65000, eth: 3500, doge: 0.16 }, // Rate saat ini
+            baseRates: { btc: 65000, eth: 3500, doge: 0.16 }, // Basis rate
+            lastRates: { btc: 65000, eth: 3500, doge: 0.16 },
+            rateVolatility: 0.15, rateNoise: 0.03, rateTime: 0,
+            rateUpdateInterval: 5000, lastRateUpdateTime: 0,
+            // Inflasi
+            inflationMultiplier: 1.0, inflationRatePerMinute: 0.003, lastInflationUpdateTime: 0,
+            // Player
+            playerLevel: 1, playerXP: 0, xpToNextLevel: 100,
+            otherCoins: { techCoin: 10, rareCoin: 1 }, // Modal awal koin
+            // Rig
+            komponen: { cpu: { level: 1, suhu: 25 }, gpu: { level: 1, suhu: 25 }, pendingin: { level: 1 }, psu: { level: 1 } },
+            maxTemp: 85, isThrottling: false, isPowerOverload: false,
+            pendinginEffectiveness: 1, suhuAmbient: 25, hashToBtcRate: 0.0000005, // Rate BTC disesuaikan
+             // Distribusi Hashrate (Contoh: 60% BTC, 30% ETH, 10% DOGE) - Perlu mekanisme target nanti
+             hashDistribution: { btc: 0.6, eth: 0.3, doge: 0.1 },
+             hashToOtherCoinRate: { eth: 0.00001, doge: 1.0 }, // Rate dasar ETH & DOGE per Hash
+            xpPerUangExchanged: 0.05,
+            // Biaya Listrik
+            electricityCostPerWattSecond: 0.0000001, // Contoh: $0.0001 per Watt per detik ($0.36/kWh)
+            // Overclocking
+            overclock: {
+                cpu: { active: false, endTime: 0, cooldownEnd: 0 },
+                gpu: { active: false, endTime: 0, cooldownEnd: 0 }
+            },
+            overclockDuration: 15 * 1000, // 15 detik
+            overclockCooldown: 60 * 1000, // 1 menit
+            overclockMultiplier: { hashrate: 1.5, power: 1.8, heat: 2.0 },
+            // Boosters
+            boosters: { hashBoost: 1, coolingBoost: 1, powerBoost: 1 }, // Jumlah booster awal
+            activeBoosters: { hashBoost: null, coolingBoost: null, powerBoost: null }, // { endTime: timestamp }
+            boosterConfig: {
+                hashBoost: { duration: 5 * 60 * 1000, multiplier: 1.3 }, // 5 menit, +30% Hash
+                coolingBoost: { duration: 10 * 60 * 1000, effectivenessMultiplier: 1.5 }, // 10 menit, +50% Efektivitas Pendingin
+                powerBoost: { duration: 5 * 60 * 1000, powerMultiplier: 0.8 } // 5 menit, -20% Konsumsi Daya
+            },
+            // Kontrak
+            activeContract: null, // { id, desc, type, target, current, reward, completed }
+            // Achievements (Contoh sederhana)
+            achievements: {
+                uang1k: { name: "Mulai Kaya", desc: "Dapatkan $1,000", target: 1000, achieved: false },
+                btcExchanged1: { name: "Trader Pemula", desc: "Tukar 0.001 BTC", target: 0.001, achieved: false},
+                level5: { name: "Naik Pangkat", desc: "Capai Level 5", target: 5, achieved: false },
+                gpuLvl5: { name: "GPU Mantap", desc: "Upgrade GPU ke Level 5", target: 5, achieved: false },
+                // ... tambahkan achievement lain
+            },
+            statsTracked: { totalUangEarned: 0, totalBTCExchanged: 0 }, // Untuk tracking achievement
+            // Event
+            activeEvent: null, // { type, name, endTime, multiplier/effectValue }
+            eventChancePerSecond: 0.002, // Peluang event per detik (0.2%)
+            eventDuration: 60 * 1000 // Durasi event 1 menit
         };
-        // ---------------------------------------
 
-        // --- FUNGSI GENERATOR STATS TIERS ---
-        function generateTierStats(level, type) {
-            const names = componentNames[type];
-            const name = names[level - 1] || `${type} Level ${level}`; // Fallback name
-            let stats = { level, name };
-            let colorHue = (level / 50) * 300; // Hue dari 0 (merah) ke 300 (magenta/ungu)
-
-            // Gunakan kurva pangkat, tapi eksponennya melambat seiring level
-            // Power_Exponent = Base_Exp * (1 - Level_Factor * log(Level))
-            // Level_Factor kecil agar penurunan eksponen lambat
-            const levelFactor = 0.05; // Seberapa cepat eksponen turun
-            const logLevel = level > 1 ? Math.log(level) : 0;
-
-            switch (type) {
-                case 'cpu':
-                    const cpuHashExp = Math.max(1.0, 1.8 - levelFactor * 2 * logLevel);
-                    const cpuPowerExp = Math.max(1.0, 1.85 - levelFactor * 1.8 * logLevel);
-                    const cpuHeatExp = Math.max(1.0, 1.82 - levelFactor * 1.9 * logLevel);
-                    stats.hashrate = Math.floor(10 * Math.pow(level, cpuHashExp));
-                    stats.power = Math.floor(50 * Math.pow(level, cpuPowerExp));
-                    stats.heat = Math.floor(5 * Math.pow(level, cpuHeatExp));
-                    stats.color = new THREE.Color(`hsl(${colorHue}, 70%, 60%)`).getHex();
-                    break;
-                case 'gpu':
-                    const gpuHashExp = Math.max(1.0, 1.9 - levelFactor * 1.5 * logLevel);
-                    const gpuPowerExp = Math.max(1.0, 2.0 - levelFactor * 1.5 * logLevel);
-                    const gpuHeatExp = Math.max(1.0, 1.95 - levelFactor * 1.6 * logLevel);
-                    stats.hashrate = Math.floor(20 * Math.pow(level, gpuHashExp));
-                    stats.power = Math.floor(100 * Math.pow(level, gpuPowerExp));
-                    stats.heat = Math.floor(15 * Math.pow(level, gpuHeatExp));
-                    stats.fans = Math.min(4, Math.floor(level / 8)); // Max 4 kipas, tambah 1 setiap 8 level
-                    stats.color = new THREE.Color(`hsl(${colorHue + 40 % 360}, 60%, 50%)`).getHex(); // Warna sedikit beda
-                    break;
-                case 'pendingin':
-                    const coolDissipationExp = Math.max(1.0, 2.2 - levelFactor * 1.2 * logLevel); // Harus > heat
-                    stats.dissipation = parseFloat((1.0 * Math.pow(level, coolDissipationExp)).toFixed(1));
-                    stats.color = new THREE.Color(`hsl(${colorHue + 180 % 360}, 50%, 70%)`).getHex(); // Warna dingin
-                    break;
-                case 'psu':
-                    const psuMaxPowerExp = Math.max(1.0, 2.3 - levelFactor * 1.0 * logLevel); // Harus > total power
-                    stats.maxPower = Math.floor(300 * Math.pow(level, psuMaxPowerExp));
-                     // Warna PSU bisa lebih bervariasi atau spesifik
-                     const psuColors = [0x424242, 0xcd7f32, 0xc0c0c0, 0xffd700, 0xe5e4e2, 0xb0c4de]; // Basic, Bronze, Silver, Gold, Plat, Titanium
-                    stats.color = psuColors[Math.min(psuColors.length - 1, Math.floor(level / 8))] || 0x333333; // Warna berdasarkan tier kasar
-                    break;
-            }
-            return stats;
-        }
-
-        // --- BUAT OBJEK TIERS SECARA OTOMATIS ---
-        const tiers = {};
-        for (const type in componentNames) {
-            tiers[type] = [];
-            for (let i = 1; i <= 50; i++) {
-                tiers[type].push(generateTierStats(i, type));
-            }
-        }
-        console.log("Generated Tiers:", tiers); // Untuk debug cek data tiers
-        // ---------------------------------------
-
-        const hargaUpgrade = { // Sesuaikan multiplier lagi?
-             cpu: { baseCost: 100, multiplier: 1.70 },
-             gpu: { baseCost: 150, multiplier: 1.75 },
-             pendingin: { baseCost: 80, multiplier: 1.65 },
-             psu: { baseCost: 120, multiplier: 1.72 }
+        // NAMA KOMPONEN (15 per jenis)
+        const componentNames_15 = { /* ... (Nama sama dari blok kode sebelumnya) ... */
+             cpu: [ "Atom Core Basic", "ByteCruncher II", "Silicon Logic C-Series", "HexaCore Starter", "Zenith Compute 5", "Quantum Leap QL-100", "NovaChip Proxima", "Aether Processor 7X", "Chronos Engine CE-3000", "Hyperion Core H9", "Galactic Mind GM-Ultra", "Singularity Chip S1", "Nebula Processing Unit (NPU)", "RiftWalker Xtreme", "Omega Vertex Prime" ], gpu: [ "PixelFlow Lite", "RenderMax R1", "Vector Prime V-200", "ShaderStorm SSX", "CryptoHash CH-50", "RayWeaver Pro", "Matrix Engine ME-750", "Photon Blaster PB-900X", "DeepMine DM-Elite", "TerraHash T-Rex", "VoidRender VR-Ultimate", "Quantum Graphics QG-Titan", "Celestial Forge CF-Max", "WarpDrive WD-Extreme", "Infinity Matrix IM-Omega" ], cooler: [ "AeroFlow Basic Fan", "CoolBreeze Tower S", "IceWind Heatsink Pro", "Arctic Chill AC-120", "Vortex Liquid V L-240", "CryoStream CS-360 Elite", "SubZero Module SZ-1", "ThermoGuard TG-X", "FrostByte Integrated Loop", "HydroChill MaxFlow", "Glacial Core GC-Pro", "Zephyr Cooling System ZCS", "Avalanche Direct Die", "Nimbus Immersion Unit", "Absolute Zero Engine AZE" ], psu: [ "Volt Basic 300W", "PowerBrick Bronze 550W", "StableWatt Silver 750W", "JuiceBox Gold 850W", "EnergyCore Platinum 1000W", "Ampere Reactor AR-1200 Titanium", "PowerForge PF-1600 Pro", "Electron Stream ES-Max", "Quantum Grid QG-2000", "Dynamo Engine DE-Ultra", "Fusion Power Module FPM", "Stellar Core SC-Xtreme", "PowerMatrix PM-Industrial", "Singularity Conduit SC-Omega", "Infinite Current Engine ICE" ]
          };
+
+        // --- FUNGSI GENERATOR STATS TIERS (15 Level) --- (Sama)
+        function generateTierStats_15(level, type) { /* ... */ const names = componentNames_15[type]; const name = names[level - 1] || `${type} Lvl ${level}`; let stats = { level, name }; const cpuHashExp = 1.9; const cpuPowerExp = 1.95; const cpuHeatExp = 1.9; const gpuHashExp = 2.0; const gpuPowerExp = 2.05; const gpuHeatExp = 2.0; const coolDissipationExp = 2.25; const psuMaxPowerExp = 2.35; switch (type) { case 'cpu': stats.hashrate = Math.floor(10 * Math.pow(level, cpuHashExp)); stats.power = Math.floor(50 * Math.pow(level, cpuPowerExp)); stats.heat = Math.floor(5 * Math.pow(level, cpuHeatExp)); stats.color = new THREE.Color(`hsl(${(level/15)*300}, 70%, 60%)`).getHex(); break; case 'gpu': stats.hashrate = Math.floor(20 * Math.pow(level, gpuHashExp)); stats.power = Math.floor(100 * Math.pow(level, gpuPowerExp)); stats.heat = Math.floor(15 * Math.pow(level, gpuHeatExp)); stats.fans = Math.min(3, Math.floor(level / 4)); stats.color = new THREE.Color(`hsl(${(level/15)*300 + 40 % 360}, 60%, 50%)`).getHex(); break; case 'pendingin': stats.dissipation = parseFloat((1.0 * Math.pow(level, coolDissipationExp)).toFixed(1)); stats.color = new THREE.Color(`hsl(${(level/15)*300 + 180 % 360}, 50%, 70%)`).getHex(); break; case 'psu': stats.maxPower = Math.floor(300 * Math.pow(level, psuMaxPowerExp)); const psuColors = [0x424242, 0xcd7f32, 0xc0c0c0, 0xffd700, 0xe5e4e2, 0xb0c4de]; stats.color = psuColors[Math.min(psuColors.length - 1, Math.floor(level / 3))] || 0x333333; break; } return stats; }
+
+        // --- BUAT OBJEK TIERS (15 Level) --- (Sama)
+        const tiers = {}; for (const type in componentNames_15) { tiers[type] = []; for (let i = 1; i <= 15; i++) { tiers[type].push(generateTierStats_15(i, type)); } } console.log("Generated 15 Tiers:", tiers);
+
+        const hargaUpgrade = { /* ... (Sama) ... */ cpu: { baseCost: 100, multiplier: 1.8 }, gpu: { baseCost: 150, multiplier: 1.9 }, pendingin: { baseCost: 80, multiplier: 1.75 }, psu: { baseCost: 120, multiplier: 1.85 } };
 
         // Level Up Functions (sama)
-        function calculateXPForLevel(level) { return Math.floor(100 * Math.pow(level, 1.7)); } // XP lebih banyak lagi
-        function getCoinsForLevelUp(level) { return { techCoin: level * 3 + Math.floor(Math.random() * level * 2), rareCoin: Math.floor(level / 3) + (level % 10 === 0 ? 2 : 0) }; } // Reward lebih besar
-        function addXP(amount) { if (amount <= 0) return; gameState.playerXP += amount; addLogMessage(`+${amount.toFixed(0)} XP`, 'xp'); while (gameState.playerXP >= gameState.xpToNextLevel) { levelUp(); } updateUI(); }
-        function levelUp() { gameState.playerXP -= gameState.xpToNextLevel; gameState.playerLevel++; gameState.xpToNextLevel = calculateXPForLevel(gameState.playerLevel); const rewards = getCoinsForLevelUp(gameState.playerLevel); gameState.otherCoins.techCoin += rewards.techCoin; gameState.otherCoins.rareCoin += rewards.rareCoin; addLogMessage(`🎉 LEVEL UP! Lv ${gameState.playerLevel}!`, 'levelup'); addLogMessage(`🎁 Hadiah: ${rewards.techCoin} Tech, ${rewards.rareCoin} Rare!`, 'reward'); }
+        /* ... */ function calculateXPForLevel(level) { return Math.floor(100 * Math.pow(level, 1.6)); } function getCoinsForLevelUp(level) { return { techCoin: level * 2 + Math.floor(Math.random() * level), rareCoin: Math.floor(level / 2) + (level % 5 === 0 ? 1 : 0) }; } function addXP(amount) { if (amount <= 0) return; gameState.playerXP += amount; addLogMessage(`+${amount.toFixed(0)} XP`, 'xp'); while (gameState.playerXP >= gameState.xpToNextLevel) { levelUp(); } updateUI(); } function levelUp() { gameState.playerXP -= gameState.xpToNextLevel; gameState.playerLevel++; gameState.xpToNextLevel = calculateXPForLevel(gameState.playerLevel); const rewards = getCoinsForLevelUp(gameState.playerLevel); gameState.otherCoins.techCoin += rewards.techCoin; gameState.otherCoins.rareCoin += rewards.rareCoin; addLogMessage(`🎉 LEVEL UP! Lv ${gameState.playerLevel}!`, 'levelup'); addLogMessage(`🎁 Hadiah: ${rewards.techCoin} Tech, ${rewards.rareCoin} Rare!`, 'reward'); checkAchievements(); }
 
-        // Helper Getters (sama, tapi getNextUpgradeCost sudah dimodifikasi)
-        function getCurrentTier(namaKomponen) { /* ... */ const level = gameState.komponen[namaKomponen].level; const tierData = tiers[namaKomponen].find(t => t.level === level); return tierData || tiers[namaKomponen][tiers[namaKomponen].length - 1]; }
-        function getNextUpgradeCost(namaKomponen) { /* ... (sudah termasuk inflasi) ... */ const levelSaatIni = gameState.komponen[namaKomponen].level; const maxLevel = tiers[namaKomponen].length; if (levelSaatIni >= maxLevel) return Infinity; const config = hargaUpgrade[namaKomponen]; const baseCost = config.baseCost * Math.pow(config.multiplier, levelSaatIni -1); const inflatedCost = baseCost * gameState.inflationMultiplier; return Math.ceil(inflatedCost); }
+        // Helper Getters (sama)
+        /* ... */ function getCurrentTier(namaKomponen) { const level = gameState.komponen[namaKomponen].level; const tierData = tiers[namaKomponen].find(t => t.level === level); return tierData || tiers[namaKomponen][tiers[namaKomponen].length - 1]; } function getNextUpgradeCost(namaKomponen) { const levelSaatIni = gameState.komponen[namaKomponen].level; const maxLevel = tiers[namaKomponen].length; if (levelSaatIni >= maxLevel) return Infinity; const config = hargaUpgrade[namaKomponen]; let baseCost = config.baseCost * Math.pow(config.multiplier, levelSaatIni -1); // Apply event discount if active if(gameState.activeEvent && gameState.activeEvent.type === 'COMPONENT_SALE') { baseCost *= gameState.activeEvent.effectValue; // Misal: effectValue = 0.8 untuk diskon 20% } const inflatedCost = baseCost * gameState.inflationMultiplier; return Math.ceil(inflatedCost); }
 
         // Three.js Globals (sama)
-        let scene, camera, renderer, controls, models = {}, environmentModels = {}, gpuFans = [], aspect, frustumSize = 20;
-        const rigBasePosition = new THREE.Vector3(0.5, 0.8, -0.5);
+        /* ... */ let scene, camera, renderer, controls, models = {}, environmentModels = {}, gpuFans = [], aspect, frustumSize = 20; const rigBasePosition = new THREE.Vector3(0.5, 0.8, -0.5);
 
-        // CORE GAME FUNCTIONS (init, gameLoop, updateMarket, updateInflation, updateGameState, exchangeBTC, upgradeComponent - sama)
-        function init() { console.log("Initializing 50 Levels..."); gameState.lastInflationUpdateTime = Date.now(); gameState.lastRateUpdateTime = Date.now(); setupThreeJS(); createEnvironmentModels(); createInitialModels(); initTooltips(); updateUI(); setInterval(gameLoop, 1000); animate(); setupEventListeners(); addLogMessage("Welcome Miner! 50 Tiers await!"); console.log("Ready."); }
-        function gameLoop() { const now = Date.now(); updateMarket(now); updateInflation(now); updateGameState(); }
-        function updateMarket(currentTime) { if (currentTime - gameState.lastRateUpdateTime >= gameState.rateUpdateInterval) { gameState.lastRateUpdateTime = currentTime; gameState.rateTime += gameState.rateUpdateInterval / 1000; const frequency = 0.05; const amplitude = gameState.baseExchangeRate * gameState.rateVolatility; const noise = (Math.random() - 0.5) * 2 * gameState.baseExchangeRate * gameState.rateNoise; let newRate = gameState.baseExchangeRate + Math.sin(gameState.rateTime * frequency) * amplitude + noise; newRate = Math.max(gameState.baseExchangeRate * 0.5, newRate); gameState.lastRate = gameState.btcExchangeRate; gameState.btcExchangeRate = newRate; console.log(`Market Update: BTC Price = ${newRate.toFixed(0)}`); updateUI(); } }
-        function updateInflation(currentTime) { const elapsedMinutes = (currentTime - gameState.lastInflationUpdateTime) / (1000 * 60); if (elapsedMinutes >= 1) { gameState.inflationMultiplier *= (1 + gameState.inflationRatePerMinute * elapsedMinutes); gameState.lastInflationUpdateTime = currentTime; console.log(`Inflation Update: Multiplier = ${gameState.inflationMultiplier.toFixed(4)}`); updateUI(); } }
-        function updateGameState() { const cpuTier = getCurrentTier('cpu'); const gpuTier = getCurrentTier('gpu'); const pendinginTier = getCurrentTier('pendingin'); const psuTier = getCurrentTier('psu'); const totalPower = cpuTier.power + gpuTier.power; gameState.isPowerOverload = totalPower > psuTier.maxPower; const powerWarningElement = document.getElementById('power-warning'); if (powerWarningElement) powerWarningElement.style.display = gameState.isPowerOverload ? 'block' : 'none'; if (gameState.isPowerOverload) { updateUI(0, totalPower); let deltaSuhu = (gameState.suhuAmbient - gameState.komponen.cpu.suhu) * 0.1; gameState.komponen.cpu.suhu += deltaSuhu; gameState.komponen.cpu.suhu = Math.max(gameState.suhuAmbient, gameState.komponen.cpu.suhu); return; } let totalHashrate = cpuTier.hashrate + gpuTier.hashrate; const heatGenerated = cpuTier.heat + gpuTier.heat; const heatDissipated = (gameState.komponen.cpu.suhu - gameState.suhuAmbient) * pendinginTier.dissipation * gameState.pendinginEffectiveness; const deltaSuhu = (heatGenerated - heatDissipated) * 0.05; gameState.komponen.cpu.suhu += deltaSuhu; gameState.komponen.cpu.suhu = Math.max(gameState.suhuAmbient, gameState.komponen.cpu.suhu); gameState.komponen.cpu.suhu = Math.min(110, gameState.komponen.cpu.suhu); const throttlingElement = document.getElementById('throttling-status'); gameState.isThrottling = gameState.komponen.cpu.suhu > gameState.maxTemp; if (throttlingElement) throttlingElement.style.display = gameState.isThrottling ? 'block' : 'none'; if (gameState.isThrottling) { const overheatFactor = (gameState.komponen.cpu.suhu - gameState.maxTemp) / 15; const throttleMultiplier = Math.max(0.1, 1 - overheatFactor); totalHashrate *= throttleMultiplier; } const btcMinedPerSecond = totalHashrate * gameState.hashToBtcRate; gameState.minedBTC += btcMinedPerSecond; updateUI(actualHashrate=totalHashrate, actualPower=totalPower); /* Kirim nilai aktual */ } // Kirim nilai aktual ke updateUI
-        function exchangeBTC(amountToExchange) { if (amountToExchange <= 0 || isNaN(amountToExchange)) { addLogMessage("Invalid amount.", 'error'); return; } if (amountToExchange > gameState.minedBTC) { addLogMessage("Insufficient BTC.", 'error'); return; } const uangGained = amountToExchange * gameState.btcExchangeRate; gameState.minedBTC -= amountToExchange; gameState.uangVirtual += uangGained; addLogMessage(`+$${uangGained.toLocaleString(undefined,{maximumFractionDigits:0})} (from ${amountToExchange.toFixed(8)} BTC @ $${gameState.btcExchangeRate.toFixed(0)}/BTC)`, 'success'); const xpGained = Math.floor(uangGained * gameState.xpPerUangExchanged); addXP(xpGained); updateUI(); }
-        function upgradeComponent(namaKomponen) { const biayaUpgrade = getNextUpgradeCost(namaKomponen); const nextLevel = gameState.komponen[namaKomponen].level + 1; const maxLevel = tiers[namaKomponen].length; if (nextLevel > maxLevel) { addLogMessage(`${namaKomponen.toUpperCase()} MAX!`, 'warning'); return; } if (gameState.uangVirtual >= biayaUpgrade) { gameState.uangVirtual -= biayaUpgrade; gameState.komponen[namaKomponen].level = nextLevel; if (namaKomponen === 'pendingin') { gameState.pendinginEffectiveness = getCurrentTier('pendingin').dissipation; } updateComponentModel3D(namaKomponen, nextLevel); addLogMessage(`Upgrade ${namaKomponen.toUpperCase()} to ${getCurrentTier(namaKomponen).name} success! (-$${biayaUpgrade.toLocaleString()})`, 'success'); updateUI(); } else { addLogMessage(`Insufficient funds ($${biayaUpgrade.toLocaleString()}).`, 'error'); } }
-
-        // UI UPDATE FUNCTION (Sama, mengandalkan data tiers baru & getNextUpgradeCost baru)
-        function updateUI(currentHashrate, currentPower) { /* ... (UI update sama seperti sebelumnya, pastikan ID span biaya benar) ... */
-             document.getElementById('player-level').textContent = gameState.playerLevel; const xpPercent = Math.min(100, (gameState.playerXP / gameState.xpToNextLevel) * 100); document.getElementById('xp-bar').style.width = `${xpPercent}%`; document.getElementById('player-xp-text').textContent = `${Math.floor(gameState.playerXP)} / ${gameState.xpToNextLevel} XP`; document.getElementById('uang-virtual').textContent = Math.floor(gameState.uangVirtual).toLocaleString(); document.getElementById('mined-btc').textContent = gameState.minedBTC.toFixed(8); document.getElementById('tech-coin').textContent = gameState.otherCoins.techCoin.toLocaleString(); document.getElementById('rare-coin').textContent = gameState.otherCoins.rareCoin.toLocaleString();
-             const actualHashrate = currentHashrate !== undefined ? currentHashrate : (getCurrentTier('cpu').hashrate + getCurrentTier('gpu').hashrate); document.getElementById('total-hashrate').textContent = actualHashrate.toFixed(1); const actualPower = currentPower !== undefined ? currentPower : (getCurrentTier('cpu').power + getCurrentTier('gpu').power); document.getElementById('total-power').textContent = actualPower.toFixed(0); document.getElementById('max-power').textContent = getCurrentTier('psu').maxPower.toFixed(0); const tempElement = document.getElementById('suhu-cpu'); const tempBar = document.getElementById('temp-bar'); const currentTemp = gameState.komponen.cpu.suhu; tempElement.textContent = currentTemp.toFixed(1); tempElement.className = 'font-bold text-lg '; if (currentTemp > gameState.maxTemp + 5) tempElement.classList.add('temp-overheat'); else if (currentTemp > gameState.maxTemp * 0.85) tempElement.classList.add('temp-hot'); else if (currentTemp > gameState.maxTemp * 0.6) tempElement.classList.add('temp-warm'); else tempElement.classList.add('temp-cool'); const tempPercent = Math.min(100, (currentTemp / (gameState.maxTemp + 10)) * 100); tempBar.style.width = `${tempPercent}%`; if (currentTemp > gameState.maxTemp) tempBar.style.backgroundColor = '#ef4444'; else if (currentTemp > gameState.maxTemp * 0.8) tempBar.style.backgroundColor = '#f87171'; else if (currentTemp > gameState.maxTemp * 0.6) tempBar.style.backgroundColor = '#fbbf24'; else tempBar.style.backgroundColor = '#34d399';
-             const exchangeRateElement = document.getElementById('exchange-rate'); const priceTrendElement = document.getElementById('price-trend'); exchangeRateElement.textContent = gameState.btcExchangeRate.toLocaleString(undefined, {maximumFractionDigits: 0}); document.getElementById('exchange-available-btc').textContent = gameState.minedBTC.toFixed(8); document.getElementById('exchange-button').disabled = gameState.minedBTC < 0.00000001; priceTrendElement.className = 'ml-1'; if (gameState.btcExchangeRate > gameState.lastRate) { priceTrendElement.textContent = '↑'; priceTrendElement.classList.add('price-up'); } else if (gameState.btcExchangeRate < gameState.lastRate) { priceTrendElement.textContent = '↓'; priceTrendElement.classList.add('price-down'); } else { priceTrendElement.textContent = '→'; priceTrendElement.classList.add('price-stable'); }
-            ['cpu', 'gpu', 'pendingin', 'psu'].forEach(comp => { const btn = document.getElementById(`upgrade-${comp}`); const level = gameState.komponen[comp].level; const maxLevel = tiers[comp].length; const currentTierInfo = tiers[comp][level - 1] || tiers[comp][maxLevel - 1]; const nameSpan = btn.querySelector('.component-name'); const costSpan = btn.querySelector('#biaya-' + comp); nameSpan.textContent = `${currentTierInfo.name} (Lvl ${level})`; if (level < maxLevel) { const biaya = getNextUpgradeCost(comp); if (costSpan) costSpan.textContent = biaya.toLocaleString(); btn.disabled = gameState.uangVirtual < biaya; const nextTierInfo = tiers[comp][level]; if (nextTierInfo) { btn._tippy?.setContent(`Upgrade ke: ${nextTierInfo.name} ($${biaya.toLocaleString()})`); } } else { nameSpan.textContent = `${currentTierInfo.name} (MAX)`; if (costSpan) costSpan.textContent = "MAX"; btn.disabled = true; btn._tippy?.setContent(`${currentTierInfo.name} (Level Maksimum)`); } });
+        // ==========================================
+        // CORE GAME FUNCTIONS
+        // ==========================================
+        function init() {
+             console.log("Initializing Full Features...");
+             gameState.lastInflationUpdateTime = Date.now(); gameState.lastRateUpdateTime = Date.now();
+             setupThreeJS(); createEnvironmentModels(); createInitialModels();
+             initTooltips();
+             generateNewContract(); // Generate kontrak pertama
+             updateAchievementsUI(); // Tampilkan achievement awal
+             updateUI();
+             setInterval(gameLoop, 1000); // Loop utama per detik
+             animate(); setupEventListeners();
+             addLogMessage("Game Loaded with Full Features!"); console.log("Ready.");
          }
 
-        function addLogMessage(message, type = 'info') { /* ... (sama) ... */ const logArea = document.getElementById('log-area'); if (!logArea) return; const newMessage = document.createElement('p'); newMessage.textContent = `[${new Date().toLocaleTimeString('id-ID',{ hour: '2-digit', minute: '2-digit', second:'2-digit' })}] ${message}`; let textColor = 'text-gray-300'; switch (type) { case 'success': textColor = 'text-green-400'; break; case 'warning': textColor = 'text-yellow-400'; break; case 'error': textColor = 'text-red-400'; break; case 'xp': textColor = 'text-cyan-400'; break; case 'levelup': textColor = 'text-fuchsia-400 font-bold'; break; case 'reward': textColor = 'text-lime-400'; break; } newMessage.className = textColor; logArea.appendChild(newMessage); logArea.scrollTop = logArea.scrollHeight; const maxLogs = 60; if (logArea.children.length > maxLogs) { logArea.removeChild(logArea.firstChild); } }
+        function gameLoop() {
+            const now = Date.now();
+            const deltaSeconds = 1.0; // Karena interval 1000ms
+
+            updateMarket(now);
+            updateInflation(now);
+            checkForEvents(now); // Cek dan jalankan event
+            updateGameState(deltaSeconds, now); // Berikan delta time
+            checkContractProgress();
+        }
+
+        function updateMarket(currentTime) { /* ... (Logika market sama, tapi update semua rate) ... */
+            if (currentTime - gameState.lastRateUpdateTime >= gameState.rateUpdateInterval) {
+                 gameState.lastRateUpdateTime = currentTime;
+                 gameState.rateTime += gameState.rateUpdateInterval / 1000;
+                 const frequency = 0.05; let marketBoomMultiplier = 1.0;
+                 if(gameState.activeEvent && gameState.activeEvent.type === 'MARKET_BOOM') marketBoomMultiplier = gameState.activeEvent.effectValue;
+                 if(gameState.activeEvent && gameState.activeEvent.type === 'MARKET_CRASH') marketBoomMultiplier = gameState.activeEvent.effectValue;
+
+                 for (const coin in gameState.rates) {
+                     const amplitude = gameState.baseRates[coin] * gameState.rateVolatility;
+                     const noise = (Math.random() - 0.5) * 2 * gameState.baseRates[coin] * gameState.rateNoise;
+                     let newRate = gameState.baseRates[coin] + Math.sin(gameState.rateTime * frequency + (coin.length*0.1)) * amplitude + noise; // Offset sinus per koin
+                     newRate = Math.max(gameState.baseRates[coin] * 0.3, newRate); // Minimal 30%
+                     newRate *= marketBoomMultiplier; // Terapkan efek event
+
+                     gameState.lastRates[coin] = gameState.rates[coin];
+                     gameState.rates[coin] = newRate;
+                 }
+                 console.log(`Market Update: BTC=$${gameState.rates.btc.toFixed(0)}, ETH=$${gameState.rates.eth.toFixed(0)}, DOGE=$${gameState.rates.doge.toFixed(2)}`);
+                 updateUI();
+            }
+        }
+        function updateInflation(currentTime) { /* ... (Logika inflasi sama) ... */
+             const elapsedMinutes = (currentTime - gameState.lastInflationUpdateTime) / (1000 * 60);
+             if (elapsedMinutes >= 1) { gameState.inflationMultiplier *= (1 + gameState.inflationRatePerMinute * elapsedMinutes); gameState.lastInflationUpdateTime = currentTime; console.log(`Inflation Update: Multiplier = ${gameState.inflationMultiplier.toFixed(4)}`); updateUI(); }
+         }
+
+        // --- EVENT SYSTEM ---
+        function checkForEvents(currentTime) {
+            // Hapus event jika sudah selesai
+            if (gameState.activeEvent && currentTime >= gameState.activeEvent.endTime) {
+                addLogMessage(`Event berakhir: ${gameState.activeEvent.name}`, 'event');
+                gameState.activeEvent = null;
+                gameState.suhuAmbient = 25; // Reset suhu ambient jika heatwave
+                updateUI();
+            }
+            // Peluang trigger event baru jika tidak ada event aktif
+            if (!gameState.activeEvent && Math.random() < gameState.eventChancePerSecond) {
+                triggerRandomEvent(currentTime);
+            }
+        }
+        function triggerRandomEvent(currentTime) {
+            const possibleEvents = [
+                { type: 'HEATWAVE', name: 'Gelombang Panas!', effect: () => gameState.suhuAmbient = 40 },
+                { type: 'MARKET_BOOM', name: 'Harga Kripto Naik!', effectValue: 1.5 }, // Harga x1.5
+                { type: 'MARKET_CRASH', name: 'Harga Kripto Anjlok!', effectValue: 0.5 }, // Harga x0.5
+                { type: 'POWER_SURGE', name: 'Lonjakan Daya!', effect: () => {} }, // Efek di handle di updateGameState
+                { type: 'COMPONENT_SALE', name: 'Diskon Upgrade!', effectValue: 0.8 }, // Diskon 20%
+            ];
+            const randomIndex = Math.floor(Math.random() * possibleEvents.length);
+            const event = possibleEvents[randomIndex];
+            gameState.activeEvent = {
+                type: event.type,
+                name: event.name,
+                endTime: currentTime + gameState.eventDuration,
+                effectValue: event.effectValue || null
+            };
+            if (event.effect) event.effect(); // Jalankan efek langsung jika ada
+            addLogMessage(`EVENT AKTIF: ${event.name}`, 'event');
+            updateUI();
+        }
+        // --------------------
+
+         // --- UPDATE GAME STATE DENGAN FITUR BARU ---
+        function updateGameState(deltaSeconds, now) { // Terima deltaSeconds & now
+            const cpuTier = getCurrentTier('cpu');
+            const gpuTier = getCurrentTier('gpu');
+            const pendinginTier = getCurrentTier('pendingin');
+            const psuTier = getCurrentTier('psu');
+
+            // Efek Booster Aktif
+            let hashMultiplier = 1.0;
+            let coolingMultiplier = 1.0;
+            let powerMultiplier = 1.0;
+            for(const boostType in gameState.activeBoosters) {
+                const booster = gameState.activeBoosters[boostType];
+                if (booster && now < booster.endTime) {
+                     switch(boostType) {
+                        case 'hashBoost': hashMultiplier *= gameState.boosterConfig.hashBoost.multiplier; break;
+                        case 'coolingBoost': coolingMultiplier *= gameState.boosterConfig.coolingBoost.effectivenessMultiplier; break;
+                        case 'powerBoost': powerMultiplier *= gameState.boosterConfig.powerBoost.powerMultiplier; break;
+                    }
+                } else if (booster && now >= booster.endTime) {
+                    gameState.activeBoosters[boostType] = null; // Nonaktifkan booster
+                     addLogMessage(`Booster ${boostType} berakhir.`, 'info');
+                }
+            }
+
+             // Cek & Update Overclocking
+             let ocHashMultiplier = 1.0; let ocPowerMultiplier = 1.0; let ocHeatMultiplier = 1.0;
+             ['cpu', 'gpu'].forEach(compType => {
+                 const oc = gameState.overclock[compType];
+                 if (oc.active) {
+                     if (now >= oc.endTime) { // Overclock selesai
+                         oc.active = false;
+                         oc.cooldownEnd = now + gameState.overclockCooldown;
+                         addLogMessage(`${compType.toUpperCase()} Overclock selesai. Cooldown...`, 'info');
+                     } else { // Overclock aktif
+                         ocHashMultiplier = gameState.overclockMultiplier.hashrate; // Asumsi OC berlaku global sementara
+                         ocPowerMultiplier = gameState.overclockMultiplier.power;
+                         ocHeatMultiplier = gameState.overclockMultiplier.heat;
+                     }
+                 }
+                 // Update cooldown (jika perlu ditampilkan di UI)
+             });
+
+             // 1. Hitung Total Daya (setelah OC & booster)
+             let totalPower = (cpuTier.power + gpuTier.power) * ocPowerMultiplier * powerMultiplier;
+
+             // Efek Event Power Surge
+             let currentMaxPower = psuTier.maxPower;
+             if(gameState.activeEvent && gameState.activeEvent.type === 'POWER_SURGE') {
+                currentMaxPower *= 0.7; // Kurangi max power 30% sementara
+                // Mungkin tambahkan visual effect / warning khusus?
+             }
+
+             // 2. Cek Batas Daya PSU
+             gameState.isPowerOverload = totalPower > currentMaxPower;
+             /* ... (handle overload power) ... */ const powerWarningElement = document.getElementById('power-warning'); if (powerWarningElement) powerWarningElement.style.display = gameState.isPowerOverload ? 'block' : 'none'; if (gameState.isPowerOverload) { updateUI(0, totalPower); let deltaSuhu = (gameState.suhuAmbient - gameState.komponen.cpu.suhu) * 0.1; gameState.komponen.cpu.suhu += deltaSuhu; gameState.komponen.cpu.suhu = Math.max(gameState.suhuAmbient, gameState.komponen.cpu.suhu); return; }
+
+             // 3. Hitung Hashrate (setelah OC & booster)
+             let totalHashrate = (cpuTier.hashrate + gpuTier.hashrate) * ocHashMultiplier * hashMultiplier;
+
+             // 4. Hitung Panas (setelah OC)
+             const heatGenerated = (cpuTier.heat + gpuTier.heat) * ocHeatMultiplier;
+
+             // 5. Simulasi Suhu & Throttling (pendingin dipengaruhi booster & event)
+             let ambientTemp = gameState.suhuAmbient;
+              if(gameState.activeEvent && gameState.activeEvent.type === 'HEATWAVE') {
+                 ambientTemp = gameState.activeEvent.effectValue || 40; // Ambil suhu dari event
+              }
+             const effectiveCooling = pendinginTier.dissipation * gameState.pendinginEffectiveness * coolingMultiplier;
+             const heatDissipated = (gameState.komponen.cpu.suhu - ambientTemp) * effectiveCooling;
+             const deltaSuhu = (heatGenerated - heatDissipated) * 0.05;
+             gameState.komponen.cpu.suhu += deltaSuhu;
+             gameState.komponen.cpu.suhu = Math.max(ambientTemp, gameState.komponen.cpu.suhu); // Jangan < ambient
+             gameState.komponen.cpu.suhu = Math.min(110, gameState.komponen.cpu.suhu);
+             /* ... (handle throttling) ... */ const throttlingElement = document.getElementById('throttling-status'); gameState.isThrottling = gameState.komponen.cpu.suhu > gameState.maxTemp; if (throttlingElement) throttlingElement.style.display = gameState.isThrottling ? 'block' : 'none'; if (gameState.isThrottling) { const overheatFactor = (gameState.komponen.cpu.suhu - gameState.maxTemp) / 15; const throttleMultiplier = Math.max(0.1, 1 - overheatFactor); totalHashrate *= throttleMultiplier; }
+
+             // 6. Hitung Koin yang ditambang (distribusi ke multi-koin)
+             gameState.minedBTC += totalHashrate * gameState.hashDistribution.btc * gameState.hashToBtcRate * deltaSeconds;
+             gameState.minedETH += totalHashrate * gameState.hashDistribution.eth * gameState.hashToOtherCoinRate.eth * deltaSeconds;
+             gameState.minedDOGE += totalHashrate * gameState.hashDistribution.doge * gameState.hashToOtherCoinRate.doge * deltaSeconds;
+
+             // 7. Hitung & Kurangi Biaya Listrik
+             const electricityCost = totalPower * gameState.electricityCostPerWattSecond * deltaSeconds;
+             gameState.uangVirtual -= electricityCost;
+             // Simpan biaya per detik untuk ditampilkan di UI
+             gameState.currentElectricityCostPerSecond = electricityCost / deltaSeconds;
+
+
+             updateUI(totalHashrate, totalPower);
+         }
+         // ------------------------------------------
+
+        // --- CRYPTO EXCHANGE (MULTI-KOIN) ---
+        function exchangeCrypto(coinType) {
+            let amountToExchange = 0;
+            let rate = 0;
+            let coinKey = '';
+
+            switch(coinType.toLowerCase()) {
+                case 'btc':
+                    amountToExchange = gameState.minedBTC;
+                    rate = gameState.rates.btc;
+                    coinKey = 'minedBTC';
+                    break;
+                case 'eth':
+                     amountToExchange = gameState.minedETH;
+                     rate = gameState.rates.eth;
+                     coinKey = 'minedETH';
+                    break;
+                case 'doge':
+                     amountToExchange = gameState.minedDOGE;
+                     rate = gameState.rates.doge;
+                     coinKey = 'minedDOGE';
+                    break;
+                default:
+                    addLogMessage(`Koin tidak dikenal: ${coinType}`, 'error');
+                    return;
+            }
+
+            if (amountToExchange <= 0.00000001) { // Perlu jumlah minimal kecil
+                 addLogMessage(`Tidak cukup ${coinType.toUpperCase()} untuk ditukar.`, 'warning');
+                 return;
+            }
+
+            const uangGained = amountToExchange * rate;
+            gameState[coinKey] -= amountToExchange; // Kurangi koin yg benar
+            gameState.uangVirtual += uangGained;
+            gameState.statsTracked.totalUangEarned += uangGained; // Track achievement
+            if(coinType.toLowerCase() === 'btc') gameState.statsTracked.totalBTCExchanged += amountToExchange; // Track achievement BTC
+
+            addLogMessage(`+$${uangGained.toLocaleString(undefined,{maximumFractionDigits:2})} (from ${amountToExchange.toFixed(4)} ${coinType.toUpperCase()} @ $${rate.toLocaleString(undefined,{maximumFractionDigits:2})}/${coinType.toUpperCase()})`, 'success');
+
+            const xpGained = Math.floor(uangGained * gameState.xpPerUangExchanged);
+            addXP(xpGained);
+             checkAchievements(); // Cek achievement setelah exchange
+            updateUI();
+        }
+        // ------------------------------------------
+
+        // --- OVERCLOCKING TOGGLE ---
+        function toggleOverclock(componentType) {
+            const now = Date.now();
+            const oc = gameState.overclock[componentType];
+            const btn = document.getElementById(`overclock-${componentType}`);
+
+            if (!oc.active && now >= oc.cooldownEnd) { // Aktifkan OC jika tidak aktif & tidak cooldown
+                oc.active = true;
+                oc.endTime = now + gameState.overclockDuration;
+                addLogMessage(`${componentType.toUpperCase()} Overclock AKTIF! (+${(gameState.overclockMultiplier.hashrate-1)*100}% Hash, +${(gameState.overclockMultiplier.power-1)*100}% Power, +${(gameState.overclockMultiplier.heat-1)*100}% Heat)`, 'warning');
+                btn.classList.add('animate-pulse'); // Indikator visual OC aktif
+            } else if (oc.active) { // Nonaktifkan OC jika sedang aktif
+                oc.active = false;
+                oc.cooldownEnd = now + gameState.overclockCooldown; // Mulai cooldown saat dimatikan manual juga
+                addLogMessage(`${componentType.toUpperCase()} Overclock dinonaktifkan manual. Cooldown...`, 'info');
+                 btn.classList.remove('animate-pulse');
+            } else { // Sedang cooldown
+                addLogMessage(`${componentType.toUpperCase()} Overclock sedang cooldown...`, 'info');
+            }
+             updateUI(); // Update status tombol
+        }
+        // ---------------------------
+
+        // --- BOOSTER ACTIVATION ---
+        function activateBooster(boosterType) {
+            if (gameState.boosters[boosterType] > 0) {
+                 if (gameState.activeBoosters[boosterType] && Date.now() < gameState.activeBoosters[boosterType].endTime) {
+                     addLogMessage(`Booster ${boosterType} sudah aktif!`, 'warning');
+                     return;
+                 }
+                gameState.boosters[boosterType]--; // Kurangi jumlah booster
+                const config = gameState.boosterConfig[boosterType];
+                gameState.activeBoosters[boosterType] = {
+                    endTime: Date.now() + config.duration
+                };
+                 addLogMessage(`Booster ${boosterType} diaktifkan! (${config.duration / 60000} menit)`, 'success');
+                 updateUI();
+            } else {
+                 addLogMessage(`Booster ${boosterType} habis!`, 'error');
+            }
+        }
+        // --------------------------
+
+        // --- CONTRACT SYSTEM ---
+        const contractTemplates = [
+            { type: "mineCoin", coin: "btc", baseTarget: 0.001, baseReward: { uang: 5000, xp: 100 } },
+            { type: "mineCoin", coin: "eth", baseTarget: 0.01, baseReward: { uang: 4000, xp: 80 } },
+            { type: "mineCoin", coin: "doge", baseTarget: 100, baseReward: { uang: 3000, xp: 60 } },
+            { type: "reachHashrate", baseTarget: 100, baseReward: { uang: 2000, xp: 150, techCoin: 5 } },
+            { type: "earnUang", baseTarget: 10000, baseReward: { xp: 200, rareCoin: 1 } },
+        ];
+
+        function generateNewContract() {
+            if (gameState.activeContract) return; // Hanya 1 kontrak aktif
+
+            const template = contractTemplates[Math.floor(Math.random() * contractTemplates.length)];
+            const levelMultiplier = 1 + (gameState.playerLevel / 5); // Target & reward naik seiring level
+            let contract = {
+                id: Date.now(), // ID unik sederhana
+                type: template.type,
+                target: template.baseTarget * levelMultiplier,
+                reward: {},
+                current: 0,
+                completed: false
+            };
+
+            // Salin & skalakan reward
+             for(const rewardType in template.baseReward) {
+                 contract.reward[rewardType] = Math.ceil(template.baseReward[rewardType] * levelMultiplier);
+             }
+
+             // Buat deskripsi berdasarkan tipe
+             switch(template.type) {
+                 case "mineCoin":
+                     contract.desc = `Tambang ${contract.target.toFixed(4)} ${template.coin.toUpperCase()}`;
+                     contract.coin = template.coin; // Simpan jenis koin target
+                     break;
+                 case "reachHashrate":
+                     contract.target = Math.ceil(contract.target / 10) * 10; // Bulatkan target hashrate
+                     contract.desc = `Capai ${contract.target.toLocaleString()} H/s`;
+                     break;
+                 case "earnUang":
+                     contract.target = Math.ceil(contract.target / 100) * 100; // Bulatkan target uang
+                     contract.desc = `Dapatkan $${contract.target.toLocaleString()} (dari Exchange)`;
+                     contract.current = gameState.statsTracked.totalUangEarned; // Nilai awal current = uang yg sdh didapat
+                     break;
+             }
+
+            gameState.activeContract = contract;
+             addLogMessage(`Kontrak Baru: ${contract.desc}`, 'contract');
+             updateUI();
+        }
+
+        function checkContractProgress() {
+            const contract = gameState.activeContract;
+            if (!contract || contract.completed) return;
+
+             let progressMade = false;
+             switch(contract.type) {
+                 case "mineCoin":
+                     let minedKey = `mined${contract.coin.toUpperCase()}`;
+                     if(gameState[minedKey] !== undefined) {
+                        contract.current = gameState[minedKey]; // Langsung ambil dari state
+                        if (contract.current >= contract.target) { contract.completed = true; progressMade = true;}
+                     }
+                     break;
+                 case "reachHashrate":
+                     // Dapatkan hashrate aktual dari UI (atau hitung ulang)
+                     const currentHash = parseFloat(document.getElementById('total-hashrate').textContent || '0');
+                     contract.current = currentHash;
+                     if (contract.current >= contract.target) { contract.completed = true; progressMade = true;}
+                     break;
+                  case "earnUang":
+                     // Cek selisih dari nilai awal saat kontrak dibuat
+                     let earnedSinceContractStart = gameState.statsTracked.totalUangEarned - contract.current;
+                     if (earnedSinceContractStart >= contract.target) {
+                         contract.completed = true;
+                         progressMade = true;
+                         contract.current = contract.target; // Set current ke target saat selesai
+                     } else {
+                         contract.current = earnedSinceContractStart; // Update progress saat ini
+                     }
+                     break;
+             }
+
+             if (progressMade) {
+                 addLogMessage(`Kontrak Selesai: ${contract.desc}! Klaim hadiah!`, 'success');
+                 updateUI(); // Update UI untuk aktifkan tombol klaim
+             } else {
+                  // Update progress bar di UI jika belum selesai
+                 updateContractProgressUI();
+             }
+        }
+        function claimContractReward() {
+             const contract = gameState.activeContract;
+             if (!contract || !contract.completed) return;
+
+             let rewardText = "Hadiah:";
+             for (const type in contract.reward) {
+                 const amount = contract.reward[type];
+                 if (type === 'uang') gameState.uangVirtual += amount;
+                 else if (type === 'xp') addXP(amount);
+                 else if (gameState.otherCoins[type] !== undefined) gameState.otherCoins[type] += amount;
+                 rewardText += ` ${amount.toLocaleString()} ${type}`;
+             }
+             addLogMessage(rewardText, 'reward');
+
+             gameState.activeContract = null; // Hapus kontrak lama
+             generateNewContract(); // Buat kontrak baru
+             updateUI();
+         }
+        // -----------------------
+
+        // --- ACHIEVEMENT SYSTEM ---
+        function checkAchievements() {
+            let achievementUnlocked = false;
+            for (const key in gameState.achievements) {
+                const achievement = gameState.achievements[key];
+                if (!achievement.achieved) {
+                    let currentProgress = 0;
+                    switch(key) {
+                        case 'uang1k': currentProgress = gameState.statsTracked.totalUangEarned; break;
+                        case 'btcExchanged1': currentProgress = gameState.statsTracked.totalBTCExchanged; break;
+                        case 'level5': currentProgress = gameState.playerLevel; break;
+                        case 'gpuLvl5': currentProgress = gameState.komponen.gpu.level; break;
+                         // Tambahkan case untuk achievement lain
+                    }
+                    if (currentProgress >= achievement.target) {
+                        achievement.achieved = true;
+                        achievementUnlocked = true;
+                        addLogMessage(`🏆 Pencapaian Terbuka: ${achievement.name}!`, 'achievement');
+                         // TODO: Berikan reward achievement?
+                    }
+                }
+            }
+             if (achievementUnlocked) updateAchievementsUI(); // Update tampilan list achievement
+        }
+
+        function updateAchievementsUI() {
+            const listElement = document.getElementById('achievements-list');
+            listElement.innerHTML = ''; // Kosongkan list
+             for (const key in gameState.achievements) {
+                 const achievement = gameState.achievements[key];
+                 const p = document.createElement('p');
+                 p.textContent = `${achievement.achieved ? '✅' : '🔲'} ${achievement.name} (${achievement.desc})`;
+                 p.className = achievement.achieved ? 'text-green-400' : 'text-gray-400';
+                 listElement.appendChild(p);
+             }
+        }
+        // --------------------------
+
+        function upgradeComponent(namaKomponen) { /* ... (Sama, tapi panggil checkAchievements) ... */
+            const biayaUpgrade = getNextUpgradeCost(namaKomponen); const nextLevel = gameState.komponen[namaKomponen].level + 1; const maxLevel = tiers[namaKomponen].length; if (nextLevel > maxLevel) { addLogMessage(`${namaKomponen.toUpperCase()} MAX!`, 'warning'); return; } if (gameState.uangVirtual >= biayaUpgrade) { gameState.uangVirtual -= biayaUpgrade; gameState.komponen[namaKomponen].level = nextLevel; if (namaKomponen === 'pendingin') { gameState.pendinginEffectiveness = getCurrentTier('pendingin').dissipation; } updateComponentModel3D(namaKomponen, nextLevel); addLogMessage(`Upgrade to ${getCurrentTier(namaKomponen).name} success! (-$${biayaUpgrade.toLocaleString()})`, 'success'); checkAchievements(); /* <-- Cek achievement setelah upgrade */ updateUI(); } else { addLogMessage(`Insufficient funds ($${biayaUpgrade.toLocaleString()}).`, 'error'); }
+        }
+
+        // UI UPDATE FUNCTION
+        function updateUI(currentHashrate, currentPower) {
+            // Header
+            /* ... (Update Level, XP, Uang, Koin Spesial) ... */
+             document.getElementById('player-level').textContent = gameState.playerLevel; const xpPercent = Math.min(100, (gameState.playerXP / gameState.xpToNextLevel) * 100); document.getElementById('xp-bar').style.width = `${xpPercent}%`; document.getElementById('player-xp-text').textContent = `${Math.floor(gameState.playerXP)} / ${gameState.xpToNextLevel} XP`; document.getElementById('uang-virtual').textContent = Math.floor(gameState.uangVirtual).toLocaleString(); document.getElementById('tech-coin').textContent = gameState.otherCoins.techCoin.toLocaleString(); document.getElementById('rare-coin').textContent = gameState.otherCoins.rareCoin.toLocaleString();
+             // Header Kripto
+             document.getElementById('mined-btc').textContent = gameState.minedBTC.toFixed(2); // Tampilkan 2 desimal saja?
+             document.getElementById('mined-eth').textContent = gameState.minedETH.toFixed(2);
+             document.getElementById('mined-doge').textContent = gameState.minedDOGE.toFixed(2);
+             // Header Stats Rig
+             /* ... (Update Hash, Suhu, Daya) ... */ const actualHashrate = currentHashrate !== undefined ? currentHashrate : (getCurrentTier('cpu').hashrate + getCurrentTier('gpu').hashrate); document.getElementById('total-hashrate').textContent = actualHashrate.toFixed(1); const actualPower = currentPower !== undefined ? currentPower : (getCurrentTier('cpu').power + getCurrentTier('gpu').power); document.getElementById('total-power').textContent = actualPower.toFixed(0); document.getElementById('max-power').textContent = getCurrentTier('psu').maxPower.toLocaleString(); const tempElement = document.getElementById('suhu-cpu'); const tempBar = document.getElementById('temp-bar'); const currentTemp = gameState.komponen.cpu.suhu; tempElement.textContent = currentTemp.toFixed(1); tempElement.className = 'stat-value '; if (currentTemp > gameState.maxTemp + 5) tempElement.classList.add('temp-overheat'); else if (currentTemp > gameState.maxTemp * 0.85) tempElement.classList.add('temp-hot'); else if (currentTemp > gameState.maxTemp * 0.6) tempElement.classList.add('temp-warm'); else tempElement.classList.add('temp-cool'); const tempPercent = Math.min(100, (currentTemp / (gameState.maxTemp + 10)) * 100); tempBar.style.width = `${tempPercent}%`; if (currentTemp > gameState.maxTemp) tempBar.style.backgroundColor = '#ef4444'; else if (currentTemp > gameState.maxTemp * 0.8) tempBar.style.backgroundColor = '#f87171'; else if (currentTemp > gameState.maxTemp * 0.6) tempBar.style.backgroundColor = '#fbbf24'; else tempBar.style.backgroundColor = '#34d399';
+              // Biaya Listrik
+              const costElement = document.getElementById('electricity-cost');
+              if(costElement) costElement.textContent = `Cost: $${(gameState.currentElectricityCostPerSecond || 0).toFixed(4)}/s`;
+
+             // Market Panel
+             for (const coin in gameState.rates) {
+                 const rateElement = document.getElementById(`rate-${coin}`);
+                 const trendElement = document.getElementById(`trend-${coin}`);
+                 if (rateElement) rateElement.textContent = gameState.rates[coin].toLocaleString(undefined, {maximumFractionDigits: coin === 'doge' ? 4 : 0}); // Lebih presisi untuk doge
+                 if (trendElement) {
+                     trendElement.className = 'ml-1';
+                     if (gameState.rates[coin] > gameState.lastRates[coin]) { trendElement.textContent = '↑'; trendElement.classList.add('price-up'); }
+                     else if (gameState.rates[coin] < gameState.lastRates[coin]) { trendElement.textContent = '↓'; trendElement.classList.add('price-down'); }
+                     else { trendElement.textContent = '→'; trendElement.classList.add('price-stable'); }
+                 }
+                 // Disable tombol exchange jika 0
+                 const exchangeBtn = document.querySelector(`button[onclick="exchangeCrypto('${coin}')"]`);
+                 if(exchangeBtn) exchangeBtn.disabled = gameState[`mined${coin.toUpperCase()}`] < 0.00000001;
+             }
+
+             // Upgrade Panel
+             /* ... (Update tombol upgrade sama) ... */ ['cpu', 'gpu', 'pendingin', 'psu'].forEach(comp => { const btn = document.getElementById(`upgrade-${comp}`); const level = gameState.komponen[comp].level; const maxLevel = tiers[comp].length; const currentTierInfo = tiers[comp][level - 1] || tiers[comp][maxLevel - 1]; const nameSpan = btn.querySelector('.component-name'); const costSpan = btn.querySelector('#biaya-' + comp); nameSpan.textContent = `${currentTierInfo.name} (Lvl ${level})`; if (level < maxLevel) { const biaya = getNextUpgradeCost(comp); if (costSpan) costSpan.textContent = biaya.toLocaleString(); btn.disabled = gameState.uangVirtual < biaya; const nextTierInfo = tiers[comp][level]; if (nextTierInfo) { btn._tippy?.setContent(`Upgrade ke: ${nextTierInfo.name} ($${biaya.toLocaleString()})`); } } else { nameSpan.textContent = `${currentTierInfo.name} (MAX)`; if (costSpan) costSpan.textContent = "MAX"; btn.disabled = true; btn._tippy?.setContent(`${currentTierInfo.name} (Level Maksimum)`); } });
+
+             // Overclock Panel
+             const now = Date.now();
+             let ocStatusText = '';
+             ['cpu', 'gpu'].forEach(compType => {
+                 const oc = gameState.overclock[compType];
+                 const btn = document.getElementById(`overclock-${compType}`);
+                 btn.disabled = oc.cooldownEnd > now; // Disable jika cooldown
+                 btn.classList.toggle('animate-pulse', oc.active); // Tambah/hapus animasi pulse
+                 if (oc.active) { ocStatusText += `${compType.toUpperCase()} OC Aktif! Sisa: ${Math.ceil((oc.endTime - now)/1000)}s. `; }
+                 else if (oc.cooldownEnd > now) { ocStatusText += `${compType.toUpperCase()} OC Cooldown: ${Math.ceil((oc.cooldownEnd - now)/1000)}s. `; }
+             });
+             document.getElementById('overclock-status').textContent = ocStatusText;
+
+             // Booster Panel
+             let activeBoostText = '';
+             for(const boostType in gameState.boosters) {
+                 document.getElementById(`count-${boostType}`).textContent = gameState.boosters[boostType];
+                 document.getElementById(`activate-${boostType}`).disabled = gameState.boosters[boostType] <= 0 || (gameState.activeBoosters[boostType] && now < gameState.activeBoosters[boostType].endTime); // Disable jika habis atau sedang aktif
+                 if (gameState.activeBoosters[boostType] && now < gameState.activeBoosters[boostType].endTime) {
+                     activeBoostText += `${boostType} Aktif (${Math.ceil((gameState.activeBoosters[boostType].endTime - now)/60000)}m). `;
+                 }
+             }
+             document.getElementById('active-boosters-status').textContent = activeBoostText;
+
+             // Contract Panel
+             updateContractProgressUI(); // Panggil fungsi khusus utk update UI kontrak
+             const claimBtn = document.getElementById('contract-claim-btn');
+             if(gameState.activeContract) claimBtn.disabled = !gameState.activeContract.completed;
+             else claimBtn.disabled = true;
+
+             // Event Panel
+             const eventElement = document.getElementById('active-event');
+             if (gameState.activeEvent) {
+                 eventElement.textContent = `EVENT: ${gameState.activeEvent.name} (${Math.ceil((gameState.activeEvent.endTime - now)/1000)}s)`;
+                 eventElement.style.display = 'block';
+             } else {
+                 eventElement.style.display = 'none';
+                 gameState.suhuAmbient = 25; // Pastikan suhu ambient kembali normal
+             }
+        }
+        function updateContractProgressUI() {
+             const contract = gameState.activeContract;
+             const descEl = document.getElementById('contract-desc');
+             const rewardEl = document.getElementById('contract-reward');
+             const progressContainer = document.getElementById('contract-progress-container');
+             const progressBar = document.getElementById('contract-progress-bar');
+
+             if (contract) {
+                 descEl.textContent = contract.desc;
+                 let rewardText = "Hadiah: ";
+                 for(const type in contract.reward) { rewardText += `${contract.reward[type].toLocaleString()} ${type}, `; }
+                 rewardEl.textContent = rewardText.slice(0, -2); // Hapus koma terakhir
+
+                 if (!contract.completed) {
+                     const progress = Math.min(100, (contract.current / contract.target) * 100);
+                     progressBar.style.width = `${progress}%`;
+                     progressContainer.style.display = 'block';
+                      // Tambah teks progress
+                     descEl.textContent = `${contract.desc} (${contract.current.toLocaleString(undefined,{maximumFractionDigits:0})}/${contract.target.toLocaleString(undefined,{maximumFractionDigits:0})})`;
+
+                 } else {
+                     progressBar.style.width = '100%';
+                     progressContainer.style.display = 'block'; // Tampilkan full bar saat selesai
+                     descEl.textContent = `${contract.desc} (Selesai!)`;
+                 }
+             } else {
+                 descEl.textContent = "Tidak ada kontrak aktif.";
+                 rewardEl.textContent = "";
+                 progressContainer.style.display = 'none';
+             }
+         }
+        function addLogMessage(message, type = 'info') { /* ... (sama) ... */ const logArea = document.getElementById('log-area'); if (!logArea) return; const newMessage = document.createElement('p'); newMessage.textContent = `[${new Date().toLocaleTimeString('id-ID',{ hour: '2-digit', minute: '2-digit', second:'2-digit' })}] ${message}`; let textColor = 'text-gray-300'; switch (type) { case 'success': textColor = 'text-green-400'; break; case 'warning': textColor = 'text-yellow-400'; break; case 'error': textColor = 'text-red-400'; break; case 'xp': textColor = 'text-cyan-400'; break; case 'levelup': textColor = 'text-fuchsia-400 font-bold'; break; case 'reward': textColor = 'text-lime-400'; break; case 'contract': textColor = 'text-violet-400'; break; /* Warna baru */ case 'event': textColor = 'text-lime-300 font-semibold'; break; case 'achievement': textColor = 'text-amber-300'; break; } newMessage.className = textColor; logArea.appendChild(newMessage); logArea.scrollTop = logArea.scrollHeight; const maxLogs = 70; if (logArea.children.length > maxLogs) { logArea.removeChild(logArea.firstChild); } }
 
         // THREE.JS FUNCTIONS (Sama)
         function setupThreeJS() { /* ... */ const container = document.getElementById('canvas-container'); if (!container) return; scene = new THREE.Scene(); scene.background = new THREE.Color(0x1f2937); aspect = container.clientWidth / container.clientHeight; frustumSize = 20; camera = new THREE.OrthographicCamera(frustumSize * aspect / -2, frustumSize * aspect / 2, frustumSize / 2, frustumSize / -2, 0.1, 1000); const camDistance = 19; camera.position.set(camDistance, camDistance * 0.9, camDistance); const lookAtPosition = new THREE.Vector3(0, 1.0, -0.5); camera.lookAt(lookAtPosition); camera.updateProjectionMatrix(); renderer = new THREE.WebGLRenderer({ antialias: true }); renderer.setSize(container.clientWidth, container.clientHeight); renderer.setPixelRatio(window.devicePixelRatio); renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFSoftShadowMap; container.appendChild(renderer.domElement); const loadingIndicator = document.getElementById('loading-indicator'); if (loadingIndicator) loadingIndicator.remove(); const ambientLight = new THREE.AmbientLight(0xcccccc, 0.7); scene.add(ambientLight); const directionalLight = new THREE.DirectionalLight(0xffffff, 1.0); directionalLight.position.set(20, 30, 20); directionalLight.target.position.copy(lookAtPosition); directionalLight.castShadow = true; directionalLight.shadow.mapSize.width = 1024; directionalLight.shadow.mapSize.height = 1024; directionalLight.shadow.camera.near = 0.5; directionalLight.shadow.camera.far = 100; directionalLight.shadow.camera.left = -frustumSize; directionalLight.shadow.camera.right = frustumSize; directionalLight.shadow.camera.top = frustumSize; directionalLight.shadow.camera.bottom = -frustumSize; scene.add(directionalLight); scene.add(directionalLight.target); controls = new THREE.OrbitControls(camera, renderer.domElement); controls.enableDamping = true; controls.dampingFactor = 0.05; controls.screenSpacePanning = true; controls.target.copy(lookAtPosition); controls.maxPolarAngle = Math.PI / 1.9; controls.minZoom = 0.4; controls.maxZoom = 3; controls.update(); window.addEventListener('resize', onWindowResize, false); }
-        function createEnvironmentModels() { /* ... */ const floorSize = 25; const floorGeo = new THREE.PlaneGeometry(floorSize, floorSize); const floorMat = new THREE.MeshStandardMaterial({ color: 0x44444f, roughness: 0.8 }); const floor = new THREE.Mesh(floorGeo, floorMat); floor.rotation.x = -Math.PI / 2; floor.position.y = 0; floor.receiveShadow = true; scene.add(floor); const wallHeight = 10; const wallThickness = 0.2; const wallMat = new THREE.MeshStandardMaterial({ color: 0x374151, roughness: 0.9 }); const wallBackGeo = new THREE.BoxGeometry(floorSize + wallThickness, wallHeight, wallThickness); const wallLeftGeo = new THREE.BoxGeometry(wallThickness, wallHeight, floorSize + wallThickness); const wallBack = new THREE.Mesh(wallBackGeo, wallMat); const wallLeft = new THREE.Mesh(wallLeftGeo, wallMat); wallBack.position.set(0, wallHeight / 2, -floorSize / 2); wallLeft.position.set(-floorSize / 2, wallHeight / 2, 0); wallBack.receiveShadow = true; wallLeft.receiveShadow = true; scene.add(wallBack); scene.add(wallLeft); const deskHeight = 0.8; const deskWidth = 4; const deskDepth = 2; const deskGeo = new THREE.BoxGeometry(deskWidth, deskHeight, deskDepth); const deskMat = new THREE.MeshStandardMaterial({ color: 0x8B4513, roughness: 0.7, metalness: 0.1 }); const desk = new THREE.Mesh(deskGeo, deskMat); desk.position.y = deskHeight / 2; desk.castShadow = true; desk.receiveShadow = true; scene.add(desk); environmentModels['desk'] = desk; const chairSeatGeo = new THREE.BoxGeometry(1, 0.2, 1); const chairBackGeo = new THREE.BoxGeometry(1, 1.2, 0.2); const chairLegGeo = new THREE.CylinderGeometry(0.05, 0.05, deskHeight * 0.5, 8); const chairMat = new THREE.MeshStandardMaterial({ color: 0x404040, roughness: 0.7 }); const chairGroup = new THREE.Group(); const chairSeat = new THREE.Mesh(chairSeatGeo, chairMat); const chairBack = new THREE.Mesh(chairBackGeo, chairMat); chairSeat.position.y = deskHeight * 0.5 + 0.2/2; chairBack.position.set(0, chairSeat.position.y + 1.2 / 2 - 0.1, -1/2 + 0.2/2); for (let i = 0; i < 4; i++) { const leg = new THREE.Mesh(chairLegGeo, chairMat); leg.position.set((i % 2 === 0 ? -0.4 : 0.4), deskHeight * 0.25, (i < 2 ? -0.4 : 0.4)); chairGroup.add(leg); } chairGroup.add(chairSeat); chairGroup.add(chairBack); chairGroup.position.set(0, 0, deskDepth / 2 + 0.6); chairGroup.traverse(child => { if (child.isMesh) { child.castShadow = true; child.receiveShadow = true; } }); scene.add(chairGroup); environmentModels['chair'] = chairGroup; const charBodyGeo = new THREE.BoxGeometry(0.6, 0.9, 0.5); const charHeadGeo = new THREE.SphereGeometry(0.3, 16, 16); const charBodyMat = new THREE.MeshStandardMaterial({ color: 0xADD8E6 }); const charHeadMat = new THREE.MeshStandardMaterial({ color: 0xADD8E6 }); const charBody = new THREE.Mesh(charBodyGeo, charBodyMat); const charHead = new THREE.Mesh(charHeadGeo, charHeadMat); charBody.position.set(0, deskHeight * 0.5 + 0.2/2 + 0.9/2, 0); charHead.position.set(0, charBody.position.y + 0.9/2 + 0.3, 0); charBody.castShadow = true; charHead.castShadow = true; chairGroup.add(charBody); chairGroup.add(charHead); environmentModels['characterBody'] = charBody; environmentModels['characterHead'] = charHead; const monitorScreenGeo = new THREE.BoxGeometry(1.5, 0.9, 0.1); const monitorStandGeo = new THREE.BoxGeometry(0.3, 0.2, 0.3); const monitorMat = new THREE.MeshStandardMaterial({ color: 0x1a1a1a, roughness: 0.2 }); const monitorScreen = new THREE.Mesh(monitorScreenGeo, monitorMat); const monitorStand = new THREE.Mesh(monitorStandGeo, monitorMat); monitorStand.position.set(0, deskHeight + 0.2/2, -deskDepth / 2 + 0.5); monitorScreen.position.set(monitorStand.position.x, monitorStand.position.y + 0.2/2 + 0.9/2, monitorStand.position.z); monitorScreen.castShadow = true; monitorScreen.receiveShadow = true; monitorStand.castShadow = true; monitorStand.receiveShadow = true; scene.add(monitorStand); scene.add(monitorScreen); environmentModels['monitorScreen'] = monitorScreen; environmentModels['monitorStand'] = monitorStand; const keybGeo = new THREE.BoxGeometry(1.2, 0.05, 0.4); const keybMat = new THREE.MeshStandardMaterial({color: 0x222222}); const keyboard = new THREE.Mesh(keybGeo, keybMat); keyboard.position.set(0, deskHeight + 0.05/2, 0.3); keyboard.castShadow = true; scene.add(keyboard); environmentModels['keyboard'] = keyboard; const mouseGeo = new THREE.BoxGeometry(0.15, 0.06, 0.25); const mouseMat = new THREE.MeshStandardMaterial({color: 0x252525}); const mouse = new THREE.Mesh(mouseGeo, mouseMat); mouse.position.set(0.8, deskHeight + 0.06/2, 0.3); mouse.castShadow = true; scene.add(mouse); environmentModels['mouse'] = mouse; rigBasePosition.y = deskHeight; }
-        function createInitialModels() { /* ... */ const moboWidth = 1.8; const moboDepth = 1.2; const moboGeo = new THREE.BoxGeometry(moboWidth, 0.05, moboDepth); const moboMat = new THREE.MeshStandardMaterial({ color: 0x005540, roughness: 0.6 }); const motherboard = new THREE.Mesh(moboGeo, moboMat); motherboard.position.set(rigBasePosition.x, rigBasePosition.y + 0.05 / 2, rigBasePosition.z); motherboard.castShadow = true; motherboard.receiveShadow = true; scene.add(motherboard); models['motherboard'] = motherboard; updateComponentModel3D('cpu', gameState.komponen.cpu.level); updateComponentModel3D('gpu', gameState.komponen.gpu.level); updateComponentModel3D('pendingin', gameState.komponen.pendingin.level); updateComponentModel3D('psu', gameState.komponen.psu.level); }
-        function updateComponentModel3D(namaKomponen, levelBaru) { /* ... */ if (!models['motherboard']) return; const moboPos = models['motherboard'].position; const moboTopY = moboPos.y + 0.05 / 2; if (models[namaKomponen]) { scene.remove(models[namaKomponen]); models[namaKomponen].traverse(child => { if (child.isMesh) { if (child.geometry) child.geometry.dispose(); if (child.material) { if (Array.isArray(child.material)) { child.material.forEach(m => m.dispose()); } else { child.material.dispose(); } } } }); delete models[namaKomponen]; } if (namaKomponen === 'gpu') { gpuFans = []; } const tierData = tiers[namaKomponen][levelBaru - 1] || tiers[namaKomponen][tiers[namaKomponen].length - 1]; let componentGroup = new THREE.Group(); let position = { x: moboPos.x, y: moboTopY, z: moboPos.z }; const scale = 0.18; switch (namaKomponen) { case 'cpu': const cpuSize = scale * (1 + (levelBaru - 1) * 0.08); const cpuGeo = new THREE.BoxGeometry(cpuSize, 0.1, cpuSize); const cpuMat = new THREE.MeshStandardMaterial({ color: tierData.color, roughness: 0.6 }); const cpuMesh = new THREE.Mesh(cpuGeo, cpuMat); cpuMesh.position.y = 0.1 / 2; componentGroup.add(cpuMesh); position.z += 0.25; break; case 'gpu': const gpuLength = 0.8 * (1 + (levelBaru - 1) * 0.12); const gpuHeight = 0.25 * (1 + (levelBaru - 1) * 0.03); const gpuWidth = 0.18; const gpuBodyGeo = new THREE.BoxGeometry(gpuWidth, gpuHeight, gpuLength); const gpuMat = new THREE.MeshStandardMaterial({ color: tierData.color, metalness: 0.2, roughness: 0.5 }); const gpuBody = new THREE.Mesh(gpuBodyGeo, gpuMat); gpuBody.position.y = gpuHeight / 2; componentGroup.add(gpuBody); if (tierData.fans > 0) { const fanRadius = gpuHeight * 0.4; const fanGeo = new THREE.CylinderGeometry(fanRadius, fanRadius, 0.05, 16); const fanMat = new THREE.MeshStandardMaterial({ color: 0x111111 }); for (let i = 0; i < tierData.fans; i++) { const fan = new THREE.Mesh(fanGeo, fanMat); fan.rotation.z = Math.PI / 2; fan.position.set(gpuWidth/2 + 0.025, gpuBody.position.y, (gpuLength / (tierData.fans + 1)) * (i + 1) - gpuLength/2); componentGroup.add(fan); gpuFans.push(fan); } } componentGroup.rotation.y = Math.PI / 2; position.z -= 0.3; break; case 'pendingin': if (models['cpu']) { const cpuModel = models['cpu'].children[0]; const cpuTopY = cpuModel.position.y + 0.1 / 2; let coolerHeight = 0; const coolerBaseSize = scale * 1.1 * (1 + (levelBaru-1)*0.05); const coolerMat = new THREE.MeshStandardMaterial({ color: tierData.color, metalness: 0.3, roughness: 0.4 }); if (levelBaru <= 25) { coolerHeight = 0.3 + (levelBaru - 1) * 0.05; const coolerGeo = new THREE.BoxGeometry(coolerBaseSize, coolerHeight, coolerBaseSize * 0.8); const coolerMesh = new THREE.Mesh(coolerGeo, coolerMat); coolerMesh.position.y = cpuTopY + coolerHeight / 2; componentGroup.add(coolerMesh); const finHeight = coolerHeight * 0.8; const finGeo = new THREE.BoxGeometry(coolerBaseSize * 1.1, finHeight, 0.02); const finMat = new THREE.MeshStandardMaterial({ color: 0xAAAAAA, metalness: 0.7 }); const finCount = Math.min(10, 3 + Math.floor(levelBaru/3)); for(let i=0; i< finCount ; i++) { const fin = new THREE.Mesh(finGeo, finMat); fin.position.set(0, cpuTopY + finHeight/2 + 0.05, (i - Math.floor(finCount/2))* (coolerBaseSize*0.8 / finCount) * 0.8 ); componentGroup.add(fin); } } else { coolerHeight = 0.5 + (levelBaru - 26) * 0.03; const coolerGeo = new THREE.BoxGeometry(coolerBaseSize * 1.2, coolerHeight, coolerBaseSize * 1.2); const coolerMesh = new THREE.Mesh(coolerGeo, coolerMat); coolerMesh.position.y = cpuTopY + coolerHeight / 2; componentGroup.add(coolerMesh); } position = models['cpu'].position.clone(); } else { return; } break; case 'psu': const psuSize = scale * 2.5 * (1 + (levelBaru - 1)*0.04); const psuHeight = scale * 1.2 * (1 + (levelBaru - 1)*0.04); const psuGeo = new THREE.BoxGeometry(psuSize, psuHeight, psuSize * 1.5); const psuMat = new THREE.MeshStandardMaterial({ color: tierData.color, metalness: 0.1, roughness: 0.7 }); const psuMesh = new THREE.Mesh(psuGeo, psuMat); psuMesh.position.y = psuHeight / 2; componentGroup.add(psuMesh); position.x -= (1.8/4 + psuSize/2); position.z -= (1.2/4 + (psuSize*1.5)/2); break; default: return; } componentGroup.traverse(child => { if (child.isMesh) { child.castShadow = true; } }); componentGroup.position.set(position.x, position.y, position.z); scene.add(componentGroup); models[namaKomponen] = componentGroup; }
-        function animate() { requestAnimationFrame(animate); const delta = 0.016; if (gpuFans.length > 0 && !gameState.isPowerOverload) { const rotationSpeed = gameState.isThrottling ? 1 : 4 + Math.log10(gameState.komponen.gpu.level); /* Kipas lebih cepat di level tinggi */ gpuFans.forEach(fan => { fan.rotation.y += rotationSpeed * delta * 10; }); } if (controls) controls.update(); renderer.render(scene, camera); }
+        function createEnvironmentModels() { /* ... (Sama) ... */ const floorSize = 25; const floorGeo = new THREE.PlaneGeometry(floorSize, floorSize); const floorMat = new THREE.MeshStandardMaterial({ color: 0x44444f, roughness: 0.8 }); const floor = new THREE.Mesh(floorGeo, floorMat); floor.rotation.x = -Math.PI / 2; floor.position.y = 0; floor.receiveShadow = true; scene.add(floor); const wallHeight = 10; const wallThickness = 0.2; const wallMat = new THREE.MeshStandardMaterial({ color: 0x374151, roughness: 0.9 }); const wallBackGeo = new THREE.BoxGeometry(floorSize + wallThickness, wallHeight, wallThickness); const wallLeftGeo = new THREE.BoxGeometry(wallThickness, wallHeight, floorSize + wallThickness); const wallBack = new THREE.Mesh(wallBackGeo, wallMat); const wallLeft = new THREE.Mesh(wallLeftGeo, wallMat); wallBack.position.set(0, wallHeight / 2, -floorSize / 2); wallLeft.position.set(-floorSize / 2, wallHeight / 2, 0); wallBack.receiveShadow = true; wallLeft.receiveShadow = true; scene.add(wallBack); scene.add(wallLeft); const deskHeight = 0.8; const deskWidth = 4; const deskDepth = 2; const deskGeo = new THREE.BoxGeometry(deskWidth, deskHeight, deskDepth); const deskMat = new THREE.MeshStandardMaterial({ color: 0x8B4513, roughness: 0.7, metalness: 0.1 }); const desk = new THREE.Mesh(deskGeo, deskMat); desk.position.y = deskHeight / 2; desk.castShadow = true; desk.receiveShadow = true; scene.add(desk); environmentModels['desk'] = desk; const chairSeatGeo = new THREE.BoxGeometry(1, 0.2, 1); const chairBackGeo = new THREE.BoxGeometry(1, 1.2, 0.2); const chairLegGeo = new THREE.CylinderGeometry(0.05, 0.05, deskHeight * 0.5, 8); const chairMat = new THREE.MeshStandardMaterial({ color: 0x404040, roughness: 0.7 }); const chairGroup = new THREE.Group(); const chairSeat = new THREE.Mesh(chairSeatGeo, chairMat); const chairBack = new THREE.Mesh(chairBackGeo, chairMat); chairSeat.position.y = deskHeight * 0.5 + 0.2/2; chairBack.position.set(0, chairSeat.position.y + 1.2 / 2 - 0.1, -1/2 + 0.2/2); for (let i = 0; i < 4; i++) { const leg = new THREE.Mesh(chairLegGeo, chairMat); leg.position.set((i % 2 === 0 ? -0.4 : 0.4), deskHeight * 0.25, (i < 2 ? -0.4 : 0.4)); chairGroup.add(leg); } chairGroup.add(chairSeat); chairGroup.add(chairBack); chairGroup.position.set(0, 0, deskDepth / 2 + 0.6); chairGroup.traverse(child => { if (child.isMesh) { child.castShadow = true; child.receiveShadow = true; } }); scene.add(chairGroup); environmentModels['chair'] = chairGroup; const charBodyGeo = new THREE.BoxGeometry(0.6, 0.9, 0.5); const charHeadGeo = new THREE.SphereGeometry(0.3, 16, 16); const charBodyMat = new THREE.MeshStandardMaterial({ color: 0xADD8E6 }); const charHeadMat = new THREE.MeshStandardMaterial({ color: 0xADD8E6 }); const charBody = new THREE.Mesh(charBodyGeo, charBodyMat); const charHead = new THREE.Mesh(charHeadGeo, charHeadMat); charBody.position.set(0, deskHeight * 0.5 + 0.2/2 + 0.9/2, 0); charHead.position.set(0, charBody.position.y + 0.9/2 + 0.3, 0); charBody.castShadow = true; charHead.castShadow = true; chairGroup.add(charBody); chairGroup.add(charHead); environmentModels['characterBody'] = charBody; environmentModels['characterHead'] = charHead; const monitorScreenGeo = new THREE.BoxGeometry(1.5, 0.9, 0.1); const monitorStandGeo = new THREE.BoxGeometry(0.3, 0.2, 0.3); const monitorMat = new THREE.MeshStandardMaterial({ color: 0x1a1a1a, roughness: 0.2 }); const monitorScreen = new THREE.Mesh(monitorScreenGeo, monitorMat); const monitorStand = new THREE.Mesh(monitorStandGeo, monitorMat); monitorStand.position.set(0, deskHeight + 0.2/2, -deskDepth / 2 + 0.5); monitorScreen.position.set(monitorStand.position.x, monitorStand.position.y + 0.2/2 + 0.9/2, monitorStand.position.z); monitorScreen.castShadow = true; monitorScreen.receiveShadow = true; monitorStand.castShadow = true; monitorStand.receiveShadow = true; scene.add(monitorStand); scene.add(monitorScreen); environmentModels['monitorScreen'] = monitorScreen; environmentModels['monitorStand'] = monitorStand; const keybGeo = new THREE.BoxGeometry(1.2, 0.05, 0.4); const keybMat = new THREE.MeshStandardMaterial({color: 0x222222}); const keyboard = new THREE.Mesh(keybGeo, keybMat); keyboard.position.set(0, deskHeight + 0.05/2, 0.3); keyboard.castShadow = true; scene.add(keyboard); environmentModels['keyboard'] = keyboard; const mouseGeo = new THREE.BoxGeometry(0.15, 0.06, 0.25); const mouseMat = new THREE.MeshStandardMaterial({color: 0x252525}); const mouse = new THREE.Mesh(mouseGeo, mouseMat); mouse.position.set(0.8, deskHeight + 0.06/2, 0.3); mouse.castShadow = true; scene.add(mouse); environmentModels['mouse'] = mouse; rigBasePosition.y = deskHeight; }
+        function createInitialModels() { /* ... (Sama) ... */ const moboWidth = 1.8; const moboDepth = 1.2; const moboGeo = new THREE.BoxGeometry(moboWidth, 0.05, moboDepth); const moboMat = new THREE.MeshStandardMaterial({ color: 0x005540, roughness: 0.6 }); const motherboard = new THREE.Mesh(moboGeo, moboMat); motherboard.position.set(rigBasePosition.x, rigBasePosition.y + 0.05 / 2, rigBasePosition.z); motherboard.castShadow = true; motherboard.receiveShadow = true; scene.add(motherboard); models['motherboard'] = motherboard; updateComponentModel3D('cpu', gameState.komponen.cpu.level); updateComponentModel3D('gpu', gameState.komponen.gpu.level); updateComponentModel3D('pendingin', gameState.komponen.pendingin.level); updateComponentModel3D('psu', gameState.komponen.psu.level); }
+        function updateComponentModel3D(namaKomponen, levelBaru) { /* ... (Sama) ... */ if (!models['motherboard']) return; const moboPos = models['motherboard'].position; const moboTopY = moboPos.y + 0.05 / 2; if (models[namaKomponen]) { scene.remove(models[namaKomponen]); models[namaKomponen].traverse(child => { if (child.isMesh) { if (child.geometry) child.geometry.dispose(); if (child.material) { if (Array.isArray(child.material)) { child.material.forEach(m => m.dispose()); } else { child.material.dispose(); } } } }); delete models[namaKomponen]; } if (namaKomponen === 'gpu') { gpuFans = []; } const tierData = tiers[namaKomponen][levelBaru - 1] || tiers[namaKomponen][tiers[namaKomponen].length - 1]; let componentGroup = new THREE.Group(); let position = { x: moboPos.x, y: moboTopY, z: moboPos.z }; const scale = 0.18; switch (namaKomponen) { case 'cpu': const cpuSize = scale * (1 + (levelBaru - 1) * 0.08); const cpuGeo = new THREE.BoxGeometry(cpuSize, 0.1, cpuSize); const cpuMat = new THREE.MeshStandardMaterial({ color: tierData.color, roughness: 0.6 }); const cpuMesh = new THREE.Mesh(cpuGeo, cpuMat); cpuMesh.position.y = 0.1 / 2; componentGroup.add(cpuMesh); position.z += 0.25; break; case 'gpu': const gpuLength = 0.8 * (1 + (levelBaru - 1) * 0.12); const gpuHeight = 0.25 * (1 + (levelBaru - 1) * 0.03); const gpuWidth = 0.18; const gpuBodyGeo = new THREE.BoxGeometry(gpuWidth, gpuHeight, gpuLength); const gpuMat = new THREE.MeshStandardMaterial({ color: tierData.color, metalness: 0.2, roughness: 0.5 }); const gpuBody = new THREE.Mesh(gpuBodyGeo, gpuMat); gpuBody.position.y = gpuHeight / 2; componentGroup.add(gpuBody); if (tierData.fans > 0) { const fanRadius = gpuHeight * 0.4; const fanGeo = new THREE.CylinderGeometry(fanRadius, fanRadius, 0.05, 16); const fanMat = new THREE.MeshStandardMaterial({ color: 0x111111 }); for (let i = 0; i < tierData.fans; i++) { const fan = new THREE.Mesh(fanGeo, fanMat); fan.rotation.z = Math.PI / 2; fan.position.set(gpuWidth/2 + 0.025, gpuBody.position.y, (gpuLength / (tierData.fans + 1)) * (i + 1) - gpuLength/2); componentGroup.add(fan); gpuFans.push(fan); } } componentGroup.rotation.y = Math.PI / 2; position.z -= 0.3; break; case 'pendingin': if (models['cpu']) { const cpuModel = models['cpu'].children[0]; const cpuTopY = cpuModel.position.y + 0.1 / 2; let coolerHeight = 0; const coolerBaseSize = scale * 1.1 * (1 + (levelBaru-1)*0.05); const coolerMat = new THREE.MeshStandardMaterial({ color: tierData.color, metalness: 0.3, roughness: 0.4 }); if (levelBaru <= 8) { coolerHeight = 0.3 + (levelBaru - 1) * 0.08; const coolerGeo = new THREE.BoxGeometry(coolerBaseSize, coolerHeight, coolerBaseSize * 0.8); const coolerMesh = new THREE.Mesh(coolerGeo, coolerMat); coolerMesh.position.y = cpuTopY + coolerHeight / 2; componentGroup.add(coolerMesh); const finHeight = coolerHeight * 0.8; const finGeo = new THREE.BoxGeometry(coolerBaseSize * 1.1, finHeight, 0.02); const finMat = new THREE.MeshStandardMaterial({ color: 0xAAAAAA, metalness: 0.7 }); const finCount = Math.min(10, 3 + Math.floor(levelBaru/2)); for(let i=0; i< finCount ; i++) { const fin = new THREE.Mesh(finGeo, finMat); fin.position.set(0, cpuTopY + finHeight/2 + 0.05, (i - Math.floor(finCount/2))* (coolerBaseSize*0.8 / finCount) * 0.8 ); componentGroup.add(fin); } } else { coolerHeight = 0.5 + (levelBaru - 9) * 0.05; const coolerGeo = new THREE.BoxGeometry(coolerBaseSize * 1.2, coolerHeight, coolerBaseSize * 1.2); const coolerMesh = new THREE.Mesh(coolerGeo, coolerMat); coolerMesh.position.y = cpuTopY + coolerHeight / 2; componentGroup.add(coolerMesh); } position = models['cpu'].position.clone(); } else { return; } break; case 'psu': const psuSize = scale * 2.5 * (1 + (levelBaru - 1)*0.04); const psuHeight = scale * 1.2 * (1 + (levelBaru - 1)*0.04); const psuGeo = new THREE.BoxGeometry(psuSize, psuHeight, psuSize * 1.5); const psuMat = new THREE.MeshStandardMaterial({ color: tierData.color, metalness: 0.1, roughness: 0.7 }); const psuMesh = new THREE.Mesh(psuGeo, psuMat); psuMesh.position.y = psuHeight / 2; componentGroup.add(psuMesh); position.x -= (1.8/4 + psuSize/2); position.z -= (1.2/4 + (psuSize*1.5)/2); break; default: return; } componentGroup.traverse(child => { if (child.isMesh) { child.castShadow = true; } }); componentGroup.position.set(position.x, position.y, position.z); scene.add(componentGroup); models[namaKomponen] = componentGroup; }
+        function animate() { requestAnimationFrame(animate); const delta = 0.016; if (gpuFans.length > 0 && !gameState.isPowerOverload) { const rotationSpeed = gameState.isThrottling ? 1 : 4 + Math.log10(gameState.komponen.gpu.level); gpuFans.forEach(fan => { fan.rotation.y += rotationSpeed * delta * 10; }); } if (controls) controls.update(); renderer.render(scene, camera); }
         function onWindowResize() { /* ... */ const container = document.getElementById('canvas-container'); if (!container || !camera || !renderer) return; const width = container.clientWidth; const height = container.clientHeight; aspect = width / height; camera.left = -frustumSize * aspect / 2; camera.right = frustumSize * aspect / 2; camera.top = frustumSize / 2; camera.bottom = -frustumSize / 2; camera.updateProjectionMatrix(); renderer.setSize(width, height); }
 
         // CUSTOMIZATION & TOOLTIPS (Sama)
@@ -224,7 +775,7 @@
         function initTooltips() { tippy('[data-tippy-content]', { theme: 'custom', arrow: true, animation: 'fade', placement: 'top-start', }); }
 
         // EVENT LISTENERS (Sama)
-        function setupEventListeners() { document.getElementById('upgrade-cpu').addEventListener('click', () => upgradeComponent('cpu')); document.getElementById('upgrade-gpu').addEventListener('click', () => upgradeComponent('gpu')); document.getElementById('upgrade-pendingin').addEventListener('click', () => upgradeComponent('pendingin')); document.getElementById('upgrade-psu').addEventListener('click', () => upgradeComponent('psu')); document.getElementById('exchange-button').addEventListener('click', () => exchangeBTC(gameState.minedBTC)); }
+        function setupEventListeners() { document.getElementById('upgrade-cpu').addEventListener('click', () => upgradeComponent('cpu')); document.getElementById('upgrade-gpu').addEventListener('click', () => upgradeComponent('gpu')); document.getElementById('upgrade-pendingin').addEventListener('click', () => upgradeComponent('pendingin')); document.getElementById('upgrade-psu').addEventListener('click', () => upgradeComponent('psu')); /* Tombol exchange dipanggil via onclick */ }
 
         // START GAME
         document.addEventListener('DOMContentLoaded', init);
@@ -232,4 +783,4 @@
     </script>
 
 </body>
-    </html>
+                                                                                                           </html>
