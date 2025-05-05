@@ -2,93 +2,147 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Crypto Miner Tycoon 3D - Isometrik</title> <script src="https://cdn.tailwindcss.com"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"> <title>Crypto Miner Tycoon - Landscape</title>
+    <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        body { font-family: 'Inter', sans-serif; }
-        button:disabled { opacity: 0.5; cursor: not-allowed; }
-        #canvas-container canvas { display: block; max-width: 100%; height: auto; }
+        /* Pastikan body mengambil seluruh tinggi viewport, penting untuk layout flex */
+        html, body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            overflow: hidden; /* Mencegah scroll di body utama */
+            font-family: 'Inter', sans-serif;
+        }
+        body {
+            display: flex;
+            flex-direction: column; /* Header di atas, konten di bawah */
+        }
+        /* Kontainer utama untuk layout landscape (3D view | Panel Kanan) */
+        #main-content-wrapper {
+            display: flex;
+            flex-direction: row; /* Konten 3D dan panel kanan berdampingan */
+            flex-grow: 1; /* Ambil sisa tinggi setelah header */
+            height: calc(100% - 64px); /* Sesuaikan jika tinggi header berbeda */
+            overflow: hidden; /* Mencegah scroll */
+        }
+        #left-panel {
+            flex-grow: 1; /* Area 3D mengambil sisa ruang */
+            height: 100%;
+            position: relative; /* Agar canvas bisa absolut di dalamnya jika perlu */
+            overflow: hidden; /* Mencegah overflow internal */
+        }
+        #canvas-container {
+            width: 100%;
+            height: 100%;
+            background-color: #4a5568; /* bg-gray-700 */
+        }
+        #right-panel {
+            width: 300px; /* Lebar tetap untuk panel kanan */
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            background-color: #2d3748; /* bg-gray-800 */
+            padding: 1rem; /* padding 4 */
+            overflow-y: auto; /* Scroll jika konten melebihi tinggi */
+            border-left: 1px solid #4a5568; /* Garis pemisah */
+        }
+        /* Styling tambahan untuk tombol dan area log di panel kanan */
+        #right-panel button:disabled { opacity: 0.5; cursor: not-allowed; }
+        #log-area { font-size: 0.875rem; /* text-sm */ }
+
+        /* Hide scrollbar for Chrome, Safari and Opera */
+        #right-panel::-webkit-scrollbar { display: none; }
+        /* Hide scrollbar for IE, Edge and Firefox */
+        #right-panel { -ms-overflow-style: none; scrollbar-width: none; }
+
     </style>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
 </head>
-<body class="bg-gray-900 text-gray-100 flex flex-col min-h-screen">
+<body class="bg-gray-900 text-gray-100">
 
-    <header class="bg-gray-800 p-4 shadow-md sticky top-0 z-10">
-        <h1 class="text-xl font-bold text-center text-teal-400">Crypto Miner Tycoon 3D (Isometrik)</h1>
+    <header class="bg-gray-800 p-3 shadow-md flex justify-around items-center h-16" style="flex-shrink: 0;">
+        <div class="text-center">
+            <span class="text-xs text-gray-400 block">💰 Uang Virtual</span>
+            <span id="uang-virtual" class="font-bold text-lg text-yellow-400">0</span>
+        </div>
+        <div class="text-center">
+            <span class="text-xs text-gray-400 block"> unprocessed</span> <span id="mined-btc" class="font-bold text-lg text-orange-400">0.0000</span> <span class="text-xs">BTC</span> </div>
+        <div class="text-center">
+            <span class="text-xs text-gray-400 block">⚡ Hashrate</span>
+            <span id="total-hashrate" class="font-bold text-lg">0</span> <span class="text-xs">H/s</span>
+        </div>
+         <div class="text-center">
+            <span class="text-xs text-gray-400 block">🌡️ Suhu CPU</span>
+            <span id="suhu-cpu" class="font-bold text-lg">25</span> <span class="text-xs">°C</span>
+        </div>
+        <div id="throttling-status" class="text-center text-red-500 font-medium text-xs" style="display: none;">
+            🔥 OVERHEAT!
+        </div>
     </header>
 
-    <main class="flex-grow container mx-auto p-4 flex flex-col space-y-6">
+    <div id="main-content-wrapper">
 
-        <div id="canvas-container" class="w-full h-64 md:h-96 bg-gray-700 rounded-lg shadow-inner overflow-hidden relative">
-            <div id="loading-indicator" class="absolute inset-0 flex items-center justify-center text-gray-400">
-                Memuat Model 3D...
+        <div id="left-panel">
+            <div id="canvas-container">
+                <div id="loading-indicator" style="position:absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: #cbd5e0;">
+                    Memuat Adegan 3D...
+                </div>
             </div>
         </div>
 
-        <section id="stats-section" class="bg-gray-800 p-4 rounded-lg shadow-md">
-            <h2 class="text-lg font-semibold mb-3 text-teal-300">Statistik Rig</h2>
-            <div class="grid grid-cols-2 gap-4 text-sm md:text-base">
-                <div>
-                    <span class="font-medium text-gray-400 block">💰 Uang Virtual:</span>
-                    <span id="uang-virtual" class="font-bold text-lg text-yellow-400">0</span>
+        <aside id="right-panel">
+            <section id="exchange-section" class="mb-6 p-3 bg-gray-700 rounded-lg shadow">
+                <h3 class="text-md font-semibold mb-2 text-teal-300">Exchange BTC</h3>
+                <div class="text-sm mb-2">
+                    <span>Rate: 1 BTC = $</span><span id="exchange-rate" class="font-semibold text-yellow-300">50000</span>
                 </div>
-                <div>
-                    <span class="font-medium text-gray-400 block">⚡ Hashrate Total:</span>
-                    <span id="total-hashrate" class="font-bold text-lg">0</span> H/s
+                <div class="mb-3">
+                    <span class="text-sm text-gray-300">Belum ditukar: </span>
+                    <span id="exchange-available-btc" class="font-bold text-orange-400">0.0000</span> <span class="text-xs">BTC</span>
                 </div>
-                <div>
-                    <span class="font-medium text-gray-400 block">🔌 Konsumsi Daya:</span>
-                    <span id="total-power" class="font-bold text-lg">0</span> W
-                </div>
-                <div>
-                    <span class="font-medium text-gray-400 block">🌡️ Suhu CPU:</span>
-                    <span id="suhu-cpu" class="font-bold text-lg">25</span> °C
-                </div>
-            </div>
-            <div id="throttling-status" class="mt-3 text-sm text-red-500 font-medium" style="display: none;">
-                🔥 PERINGATAN: Suhu terlalu tinggi! Performa menurun.
-            </div>
-        </section>
-
-        <section id="upgrade-section" class="bg-gray-800 p-4 rounded-lg shadow-md">
-            <h2 class="text-lg font-semibold mb-3 text-teal-300">Upgrade Komponen</h2>
-            <div class="flex flex-col space-y-4">
-                <button id="upgrade-cpu" class="w-full bg-teal-600 hover:bg-teal-700 text-white font-bold p-3 rounded-lg shadow transition duration-150 ease-in-out disabled:bg-gray-600">
-                    Upgrade CPU (Lvl <span id="level-cpu">1</span>) - Biaya: <span id="biaya-cpu">100</span>
+                <button id="exchange-button" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold p-2 rounded-lg shadow text-sm transition duration-150 ease-in-out disabled:bg-gray-500">
+                    Tukar Semua BTC
                 </button>
-                <button id="upgrade-gpu" class="w-full bg-teal-600 hover:bg-teal-700 text-white font-bold p-3 rounded-lg shadow transition duration-150 ease-in-out disabled:bg-gray-600">
-                    Upgrade GPU (Lvl <span id="level-gpu">1</span>) - Biaya: <span id="biaya-gpu">150</span>
-                </button>
-                <button id="upgrade-pendingin" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold p-3 rounded-lg shadow transition duration-150 ease-in-out disabled:bg-gray-600">
-                    Upgrade Pendingin CPU (Lvl <span id="level-pendingin">1</span>) - Biaya: <span id="biaya-pendingin">80</span>
-                </button>
-            </div>
-        </section>
+            </section>
 
-        <section id="log-section" class="bg-gray-800 p-3 rounded-lg shadow-md">
-            <h3 class="text-md font-semibold mb-2 text-teal-300">Log Aktivitas</h3>
-            <div id="log-area" class="h-20 overflow-y-auto text-sm space-y-1 text-gray-300">
-                <p>Selamat datang di Crypto Miner Tycoon!</p>
-            </div>
-        </section>
+            <section id="upgrade-section" class="mb-6 p-3 bg-gray-700 rounded-lg shadow">
+                <h3 class="text-md font-semibold mb-3 text-teal-300">Upgrade Komponen</h3>
+                <div class="flex flex-col space-y-3">
+                    <button id="upgrade-cpu" class="w-full bg-teal-600 hover:bg-teal-700 text-white font-bold p-2 rounded-lg shadow text-sm transition duration-150 ease-in-out disabled:bg-gray-500">
+                        CPU (Lvl <span id="level-cpu">1</span>) - $ <span id="biaya-cpu">100</span>
+                    </button>
+                    <button id="upgrade-gpu" class="w-full bg-teal-600 hover:bg-teal-700 text-white font-bold p-2 rounded-lg shadow text-sm transition duration-150 ease-in-out disabled:bg-gray-500">
+                        GPU (Lvl <span id="level-gpu">1</span>) - $ <span id="biaya-gpu">150</span>
+                    </button>
+                    <button id="upgrade-pendingin" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold p-2 rounded-lg shadow text-sm transition duration-150 ease-in-out disabled:bg-gray-500">
+                        Pendingin (Lvl <span id="level-pendingin">1</span>) - $ <span id="biaya-pendingin">80</span>
+                    </button>
+                </div>
+            </section>
 
-    </main>
+            <section id="log-section" class="flex-grow flex flex-col p-3 bg-gray-700 rounded-lg shadow overflow-hidden">
+                <h3 class="text-md font-semibold mb-2 text-teal-300 flex-shrink-0">Log Aktivitas</h3>
+                <div id="log-area" class="flex-grow overflow-y-auto text-xs space-y-1 text-gray-300">
+                    <p>Selamat datang! Mulai mining...</p>
+                </div>
+            </section>
+        </aside>
 
-    <footer class="text-center text-xs text-gray-500 p-4 mt-6">
-        Prototipe Awal Isometrik - 2025
-    </footer>
+    </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://unpkg.com/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
 
     <script>
         // ==========================================
-        // KONFIGURASI & STATE GAME AWAL
+        // STATE GAME & KONFIGURASI
         // ==========================================
         const gameState = {
             uangVirtual: 100,
+            minedBTC: 0, // BTC yang sudah ditambang tapi belum ditukar
+            btcExchangeRate: 50000, // Contoh rate: 1 BTC = $50000
             komponen: {
                 cpu: { level: 1, suhu: 25 },
                 gpu: { level: 1, suhu: 25 },
@@ -98,44 +152,30 @@
             maxTemp: 85,
             isThrottling: false,
             pendinginEffectiveness: 1,
-            suhuAmbient: 25
+            suhuAmbient: 25,
+            hashToBtcRate: 0.000001 // Contoh: 1 H/s menghasilkan 0.000001 BTC per detik
         };
 
-        const tiers = {
-            cpu: [
-                { level: 1, hashrate: 10, power: 50, heat: 5 },
-                { level: 2, hashrate: 25, power: 70, heat: 8 },
-                { level: 3, hashrate: 60, power: 100, heat: 12 },
-            ],
-            gpu: [
-                { level: 1, hashrate: 20, power: 100, heat: 15 },
-                { level: 2, hashrate: 50, power: 150, heat: 25 },
-                { level: 3, hashrate: 120, power: 220, heat: 40 },
-            ],
-            pendingin: [
-                { level: 1, dissipation: 1.0 },
-                { level: 2, dissipation: 1.5 },
-                { level: 3, dissipation: 2.2 },
-            ],
-            psu: [
-                { level: 1, maxPower: 300 },
-                { level: 2, maxPower: 500 },
-            ]
+        const tiers = { // Data komponen per level (hashrate, power, heat)
+            cpu: [{ level: 1, hashrate: 10, power: 50, heat: 5 }, { level: 2, hashrate: 25, power: 70, heat: 8 }, { level: 3, hashrate: 60, power: 100, heat: 12 }],
+            gpu: [{ level: 1, hashrate: 20, power: 100, heat: 15 }, { level: 2, hashrate: 50, power: 150, heat: 25 }, { level: 3, hashrate: 120, power: 220, heat: 40 }],
+            pendingin: [{ level: 1, dissipation: 1.0 }, { level: 2, dissipation: 1.5 }, { level: 3, dissipation: 2.2 }],
+            psu: [{ level: 1, maxPower: 300 }, { level: 2, maxPower: 500 }]
         };
 
-        const hargaUpgrade = {
+        const hargaUpgrade = { // Biaya upgrade awal dan multiplier
             cpu: { baseCost: 100, multiplier: 1.8 },
             gpu: { baseCost: 150, multiplier: 2.0 },
             pendingin: { baseCost: 80, multiplier: 1.6 }
         };
 
-        function getCurrentTier(namaKomponen) {
+        // Fungsi helper
+        function getCurrentTier(namaKomponen) { /* ... (sama seperti sebelumnya) ... */
             const level = gameState.komponen[namaKomponen].level;
             const tierData = tiers[namaKomponen].find(t => t.level === level);
             return tierData || tiers[namaKomponen][tiers[namaKomponen].length - 1];
-        }
-
-        function getNextUpgradeCost(namaKomponen) {
+         }
+        function getNextUpgradeCost(namaKomponen) { /* ... (sama seperti sebelumnya) ... */
             const levelSaatIni = gameState.komponen[namaKomponen].level;
             const config = hargaUpgrade[namaKomponen];
             return Math.ceil(config.baseCost * Math.pow(config.multiplier, levelSaatIni -1));
@@ -143,23 +183,26 @@
 
         // Variabel global Three.js
         let scene, camera, renderer, controls;
-        let models = {};
-        // Tambahkan variabel untuk ukuran frustum kamera ortografik
-        let aspect, frustumSize = 15; // Ukuran area pandang vertikal, sesuaikan nilai ini untuk zoom awal
+        let models = {}; // Menyimpan referensi mesh komponen rig
+        let environmentModels = {}; // Menyimpan referensi mesh lingkungan (meja, kursi, dll)
+        let aspect, frustumSize = 20; // Sesuaikan untuk zoom awal dengan scene baru yang lebih besar
+
+        // Posisi relatif rig di atas meja
+        const rigBasePosition = new THREE.Vector3(0, 0.8, 0); // X, Y (di atas meja), Z
 
         // ==========================================
         // FUNGSI INTI GAME
         // ==========================================
-
         function init() {
-            console.log("Memulai inisialisasi game (Isometrik)...");
+            console.log("Memulai inisialisasi game (Landscape)...");
             setupThreeJS();
-            createInitialModels();
+            createEnvironmentModels(); // Buat meja, kursi, dll dulu
+            createInitialModels(); // Buat rig di atas meja
             updateUI();
             setInterval(updateGameState, 1000);
             animate();
             setupEventListeners();
-            addLogMessage("Game berhasil dimuat. Mode Tampilan: Isometrik.");
+            addLogMessage("Game dimuat. Mode Landscape Aktif. Mulai mining BTC!");
             console.log("Inisialisasi selesai.");
         }
 
@@ -175,79 +218,108 @@
             gameState.komponen.cpu.suhu += deltaSuhu * 0.05;
             gameState.komponen.cpu.suhu = Math.max(gameState.suhuAmbient, gameState.komponen.cpu.suhu);
 
+            // Logika Throttling
+            const throttlingElement = document.getElementById('throttling-status');
             if (gameState.komponen.cpu.suhu > gameState.maxTemp) {
                 const overheatFactor = (gameState.komponen.cpu.suhu - gameState.maxTemp) / 10;
                 const throttleMultiplier = Math.max(0.1, 1 - overheatFactor);
                 totalHashrate *= throttleMultiplier;
                 gameState.isThrottling = true;
-                document.getElementById('throttling-status').style.display = 'block';
+                if (throttlingElement) throttlingElement.style.display = 'block';
             } else {
                 gameState.isThrottling = false;
-                 document.getElementById('throttling-status').style.display = 'none';
+                 if (throttlingElement) throttlingElement.style.display = 'none';
             }
 
-            const profitPerDetik = totalHashrate * 0.001;
-            gameState.uangVirtual += profitPerDetik;
-            updateUI(totalHashrate, totalPower);
+            // --- Perubahan Utama: Hitung BTC, bukan langsung Uang ---
+            const btcMinedPerSecond = totalHashrate * gameState.hashToBtcRate;
+            gameState.minedBTC += btcMinedPerSecond;
+            // gameState.uangVirtual += profitPerDetik; // Hapus baris ini
+
+            updateUI(totalHashrate, totalPower); // Kirim hashrate & power ke UI
         }
 
+        /**
+         * Menukarkan sejumlah BTC menjadi Uang Virtual.
+         * @param {number} amountToExchange - Jumlah BTC yang ingin ditukar.
+         */
+        function exchangeBTC(amountToExchange) {
+            if (amountToExchange <= 0 || isNaN(amountToExchange)) {
+                addLogMessage("Jumlah BTC untuk ditukar tidak valid.", 'error');
+                return;
+            }
+            if (amountToExchange > gameState.minedBTC) {
+                 addLogMessage("BTC yang dimiliki tidak cukup untuk ditukar.", 'error');
+                 return;
+            }
+
+            const uangGained = amountToExchange * gameState.btcExchangeRate;
+            gameState.minedBTC -= amountToExchange;
+            gameState.uangVirtual += uangGained;
+
+            addLogMessage(`Berhasil menukar ${amountToExchange.toFixed(8)} BTC menjadi $${uangGained.toFixed(2)}`, 'success');
+            console.log(`Exchanged ${amountToExchange} BTC for ${uangGained} Uang Virtual.`);
+
+            updateUI(); // Perbarui tampilan UI setelah exchange
+        }
+
+
         function upgradeComponent(namaKomponen) {
+            // ... (Logika upgrade sama seperti sebelumnya, cek uang, level up, update 3D)
             const biayaUpgrade = getNextUpgradeCost(namaKomponen);
             const nextLevel = gameState.komponen[namaKomponen].level + 1;
             const maxLevel = tiers[namaKomponen].length;
 
-            if (nextLevel > maxLevel) {
-                addLogMessage(`Komponen ${namaKomponen.toUpperCase()} sudah mencapai level maksimum!`, 'warning');
-                return;
-            }
-
+            if (nextLevel > maxLevel) { /* ... Pesan Max Level ... */ addLogMessage(`Komponen ${namaKomponen.toUpperCase()} sudah mencapai level maksimum!`, 'warning'); return; }
             if (gameState.uangVirtual >= biayaUpgrade) {
                 gameState.uangVirtual -= biayaUpgrade;
                 gameState.komponen[namaKomponen].level = nextLevel;
-                console.log(`Komponen ${namaKomponen} diupgrade ke level ${nextLevel}`);
-                if (namaKomponen === 'pendingin') {
-                    gameState.pendinginEffectiveness = getCurrentTier('pendingin').dissipation;
-                }
-                updateComponentModel3D(namaKomponen, nextLevel);
+                if (namaKomponen === 'pendingin') { gameState.pendinginEffectiveness = getCurrentTier('pendingin').dissipation; }
+                updateComponentModel3D(namaKomponen, nextLevel); // Panggil update 3D
                 addLogMessage(`Upgrade ${namaKomponen.toUpperCase()} ke Lvl ${nextLevel} berhasil! (-$${biayaUpgrade.toFixed(0)})`, 'success');
                 updateUI();
-            } else {
-                addLogMessage(`Uang tidak cukup untuk upgrade ${namaKomponen.toUpperCase()}. Butuh $${biayaUpgrade.toFixed(0)}.`, 'error');
-            }
+            } else { /* ... Pesan Uang Kurang ... */ addLogMessage(`Uang tidak cukup untuk upgrade ${namaKomponen.toUpperCase()}. Butuh $${biayaUpgrade.toFixed(0)}.`, 'error'); }
         }
 
         function updateUI(currentHashrate, currentPower) {
+            // Update Header Stats
             document.getElementById('uang-virtual').textContent = gameState.uangVirtual.toFixed(2);
-            const cpuTier = getCurrentTier('cpu');
-            const gpuTier = getCurrentTier('gpu');
-            const displayHashrate = currentHashrate !== undefined ? currentHashrate : (cpuTier.hashrate + gpuTier.hashrate);
-            const displayPower = currentPower !== undefined ? currentPower : (cpuTier.power + gpuTier.power);
-            document.getElementById('total-hashrate').textContent = displayHashrate.toFixed(1);
-            document.getElementById('total-power').textContent = displayPower.toFixed(0);
+            document.getElementById('mined-btc').textContent = gameState.minedBTC.toFixed(8); // Tampilkan 8 desimal untuk BTC
+            document.getElementById('total-hashrate').textContent = (currentHashrate !== undefined ? currentHashrate : (getCurrentTier('cpu').hashrate + getCurrentTier('gpu').hashrate)).toFixed(1);
             document.getElementById('suhu-cpu').textContent = gameState.komponen.cpu.suhu.toFixed(1);
 
+            // Update Panel Kanan - Exchange
+            document.getElementById('exchange-rate').textContent = gameState.btcExchangeRate.toLocaleString(); // Format angka rate
+            document.getElementById('exchange-available-btc').textContent = gameState.minedBTC.toFixed(8);
+            document.getElementById('exchange-button').disabled = gameState.minedBTC <= 0; // Nonaktifkan jika tidak ada BTC
+
+            // Update Panel Kanan - Tombol Upgrade
             ['cpu', 'gpu', 'pendingin'].forEach(comp => {
                 const level = gameState.komponen[comp].level;
                 const maxLevel = tiers[comp].length;
                 const btn = document.getElementById(`upgrade-${comp}`);
                 const levelSpan = document.getElementById(`level-${comp}`);
                 const biayaSpan = document.getElementById(`biaya-${comp}`);
+
                 levelSpan.textContent = level;
                 if (level < maxLevel) {
                     const biaya = getNextUpgradeCost(comp);
                     biayaSpan.textContent = biaya.toFixed(0);
                     btn.disabled = gameState.uangVirtual < biaya;
-                    btn.childNodes[0].nodeValue = `Upgrade ${comp.charAt(0).toUpperCase() + comp.slice(1)} (Lvl ${level}) - Biaya: `;
+                    // Update teks tombol (lebih ringkas)
+                    btn.childNodes[0].nodeValue = `${comp.toUpperCase()} (Lvl ${level}) - $`; // Nama komponen (LEVEL) - $
                 } else {
                     biayaSpan.textContent = "MAX";
                     btn.disabled = true;
-                    btn.childNodes[0].nodeValue = `${comp.charAt(0).toUpperCase() + comp.slice(1)} Level Maksimum Tercapai `;
+                    btn.childNodes[0].nodeValue = `${comp.toUpperCase()} (MAX) - $`; // Nama komponen (MAX) - $
                 }
             });
         }
 
         function addLogMessage(message, type = 'info') {
-            const logArea = document.getElementById('log-area');
+            // ... (Fungsi log sama seperti sebelumnya) ...
+             const logArea = document.getElementById('log-area');
+            if (!logArea) return; // Cek jika log area ada
             const newMessage = document.createElement('p');
             newMessage.textContent = message;
             switch (type) {
@@ -258,57 +330,32 @@
             }
             logArea.appendChild(newMessage);
             logArea.scrollTop = logArea.scrollHeight;
-            const maxLogs = 20;
+            const maxLogs = 30; // Tambah kapasitas log
             if (logArea.children.length > maxLogs) {
                 logArea.removeChild(logArea.firstChild);
             }
         }
 
         // ==========================================
-        // FUNGSI THREE.JS (dengan Kamera Ortografik)
+        // FUNGSI THREE.JS (Scene, Kamera, Model)
         // ==========================================
-
-        /**
-         * Setup scene, kamera (Ortografik), renderer, dan kontrol Three.js.
-         */
         function setupThreeJS() {
             const container = document.getElementById('canvas-container');
-            if (!container) {
-                console.error("Elemen #canvas-container tidak ditemukan!");
-                return;
-            }
+            if (!container) return;
 
-            // 1. Scene
             scene = new THREE.Scene();
-            scene.background = new THREE.Color(0x2d3748); // bg-gray-800
+            scene.background = new THREE.Color(0x4a5568); // bg-gray-700
 
-            // 2. Kamera (OrthographicCamera untuk tampilan isometrik)
             aspect = container.clientWidth / container.clientHeight;
-            // Hitung batas frustum berdasarkan ukuran dan aspek rasio
-            const frustumHeight = frustumSize; // Tinggi area pandang
-            const frustumWidth = frustumHeight * aspect; // Lebar area pandang disesuaikan aspek rasio
-
-            camera = new THREE.OrthographicCamera(
-                frustumWidth / -2, // left
-                frustumWidth / 2,  // right
-                frustumHeight / 2, // top
-                frustumHeight / -2,// bottom
-                1,                 // near plane (lebih kecil dari jarak kamera)
-                1000               // far plane
-            );
-
-            // Posisikan kamera untuk sudut pandang isometrik
-            // Jarak yang sama pada X, Y, Z memberikan sudut isometrik klasik
-            const camDistance = 15; // Jarak kamera dari titik fokus, sesuaikan jika perlu
-            camera.position.set(camDistance, camDistance, camDistance);
-            // Atur kamera untuk melihat ke pusat scene atau sedikit di atas motherboard
-            const lookAtPosition = new THREE.Vector3(0, 1, 0); // Titik fokus (misal: tengah rig)
+            frustumSize = 20; // Mungkin perlu lebih besar karena ada meja+kursi
+            camera = new THREE.OrthographicCamera(frustumSize * aspect / -2, frustumSize * aspect / 2, frustumSize / 2, frustumSize / -2, 1, 1000);
+            const camDistance = 18; // Jarak kamera mungkin perlu disesuaikan
+            camera.position.set(camDistance * 0.8, camDistance * 0.7, camDistance); // Sesuaikan sudut sedikit
+            // Fokus kamera sedikit lebih tinggi dan ke belakang dari meja
+            const lookAtPosition = new THREE.Vector3(0, 1.5, -1);
             camera.lookAt(lookAtPosition);
-             // Penting: Panggil update setelah mengubah properti
             camera.updateProjectionMatrix();
 
-
-            // 3. Renderer
             renderer = new THREE.WebGLRenderer({ antialias: true });
             renderer.setSize(container.clientWidth, container.clientHeight);
             renderer.setPixelRatio(window.devicePixelRatio);
@@ -316,181 +363,240 @@
             const loadingIndicator = document.getElementById('loading-indicator');
             if (loadingIndicator) loadingIndicator.remove();
 
-            // 4. Pencahayaan (Mungkin perlu sedikit penyesuaian posisi directional light)
-            const ambientLight = new THREE.AmbientLight(0xcccccc, 0.7); // Sedikit lebih terang
+            // Pencahayaan
+            const ambientLight = new THREE.AmbientLight(0xcccccc, 0.8);
             scene.add(ambientLight);
-            const directionalLight = new THREE.DirectionalLight(0xffffff, 0.9); // Sedikit lebih terang
-            // Sesuaikan posisi lampu agar pencahayaan tetap baik dari sudut isometrik
-            directionalLight.position.set(10, 15, 10); // Lebih tinggi dan dari samping/atas
-            directionalLight.lookAt(lookAtPosition); // Arahkan ke titik fokus yang sama
+            const directionalLight = new THREE.DirectionalLight(0xffffff, 1.0);
+            directionalLight.position.set(15, 20, 10); // Arah cahaya utama
+            directionalLight.target.position.copy(lookAtPosition); // Targetkan cahaya ke titik fokus
             scene.add(directionalLight);
-             // Opsional: Helper untuk visualisasi arah cahaya
-             // const lightHelper = new THREE.DirectionalLightHelper(directionalLight, 1);
-             // scene.add(lightHelper);
+            scene.add(directionalLight.target); // Target harus di scene agar lookAt bekerja
 
-
-            // 5. Kontrol Kamera (OrbitControls dengan Kamera Ortografik)
+            // Kontrol
             controls = new THREE.OrbitControls(camera, renderer.domElement);
             controls.enableDamping = true;
             controls.dampingFactor = 0.1;
-            // Dengan kamera ortografik, zoom tidak mengubah jarak, tapi skala frustum
-            // Rotasi mungkin terasa berbeda, panning tetap sama
-            // controls.enableRotate = false; // Uncomment baris ini jika ingin MENGUNCI rotasi (view isometrik tetap)
-            controls.screenSpacePanning = true; // Panning lebih intuitif
-            controls.target.copy(lookAtPosition); // Pastikan kontrol berputar di sekitar titik fokus yang benar
+            // controls.enableRotate = false; // Tetap biarkan bisa rotasi untuk melihat-lihat
+            controls.screenSpacePanning = true;
+            controls.target.copy(lookAtPosition);
+            controls.maxPolarAngle = Math.PI / 1.8; // Batasi sudut lihat ke bawah
+            controls.minZoom = 0.5; // Batas zoom out orthographic
+            controls.maxZoom = 3;   // Batas zoom in orthographic
             controls.update();
 
-            // 6. Responsivitas Canvas
             window.addEventListener('resize', onWindowResize, false);
         }
 
         /**
-         * Membuat model 3D awal untuk semua komponen. (Tidak ada perubahan logika di sini)
+         * Membuat model 3D untuk lingkungan (meja, kursi, monitor, karakter placeholder).
+         */
+        function createEnvironmentModels() {
+            const deskHeight = 0.8;
+            const deskWidth = 4;
+            const deskDepth = 2;
+
+            // Meja (coklat)
+            const deskGeo = new THREE.BoxGeometry(deskWidth, deskHeight, deskDepth);
+            const deskMat = new THREE.MeshStandardMaterial({ color: 0x8B4513, roughness: 0.8 }); // SaddleBrown
+            const desk = new THREE.Mesh(deskGeo, deskMat);
+            desk.position.y = deskHeight / 2; // Dasar meja di Y=0
+            scene.add(desk);
+            environmentModels['desk'] = desk;
+
+             // Kursi (abu-abu gelap)
+            const chairSeatGeo = new THREE.BoxGeometry(1, 0.2, 1);
+            const chairBackGeo = new THREE.BoxGeometry(1, 1.2, 0.2);
+            const chairMat = new THREE.MeshStandardMaterial({ color: 0x404040, roughness: 0.7 });
+            const chairSeat = new THREE.Mesh(chairSeatGeo, chairMat);
+            const chairBack = new THREE.Mesh(chairBackGeo, chairMat);
+            chairSeat.position.set(0, deskHeight * 0.6, deskDepth / 2 + 0.6); // Depan meja, sedikit ke belakang
+            chairBack.position.set(0, chairSeat.position.y + 1.2 / 2, chairSeat.position.z + 1 / 2 - 0.2 / 2); // Belakang & atas dudukan
+            scene.add(chairSeat);
+            scene.add(chairBack);
+            environmentModels['chairSeat'] = chairSeat;
+            environmentModels['chairBack'] = chairBack;
+
+            // Karakter Placeholder (biru muda)
+            const charBodyGeo = new THREE.BoxGeometry(0.6, 0.9, 0.5);
+            const charHeadGeo = new THREE.SphereGeometry(0.3, 16, 16);
+            const charMat = new THREE.MeshStandardMaterial({ color: 0xADD8E6 }); // LightBlue
+            const charBody = new THREE.Mesh(charBodyGeo, charMat);
+            const charHead = new THREE.Mesh(charHeadGeo, charMat);
+            // Posisikan badan di atas kursi
+            charBody.position.set(chairSeat.position.x, chairSeat.position.y + 0.2/2 + 0.9/2, chairSeat.position.z);
+            // Posisikan kepala di atas badan
+            charHead.position.set(charBody.position.x, charBody.position.y + 0.9/2 + 0.3, charBody.position.z);
+            scene.add(charBody);
+            scene.add(charHead);
+            environmentModels['characterBody'] = charBody;
+            environmentModels['characterHead'] = charHead;
+
+            // Monitor Placeholder (hitam)
+            const monitorScreenGeo = new THREE.BoxGeometry(1.5, 0.9, 0.1);
+            const monitorStandGeo = new THREE.BoxGeometry(0.3, 0.2, 0.3);
+            const monitorMat = new THREE.MeshStandardMaterial({ color: 0x1a1a1a, roughness: 0.2 });
+            const monitorScreen = new THREE.Mesh(monitorScreenGeo, monitorMat);
+            const monitorStand = new THREE.Mesh(monitorStandGeo, monitorMat);
+            // Stand di atas meja
+            monitorStand.position.set(0, deskHeight + 0.2/2, -deskDepth / 2 + 0.5);
+            // Layar di atas stand
+            monitorScreen.position.set(monitorStand.position.x, monitorStand.position.y + 0.2/2 + 0.9/2, monitorStand.position.z);
+            scene.add(monitorStand);
+            scene.add(monitorScreen);
+            environmentModels['monitorScreen'] = monitorScreen;
+            environmentModels['monitorStand'] = monitorStand;
+
+             // Update rigBasePosition Y agar sesuai tinggi meja
+             rigBasePosition.y = deskHeight;
+        }
+
+
+        /**
+         * Membuat model 3D awal untuk komponen rig di atas meja.
          */
         function createInitialModels() {
-            const moboGeo = new THREE.BoxGeometry(6, 0.2, 4);
+            // Motherboard (alas rig) di atas meja
+            const moboGeo = new THREE.BoxGeometry(1.5, 0.05, 1); // Lebih kecil
             const moboMat = new THREE.MeshStandardMaterial({ color: 0x004d40 });
             const motherboard = new THREE.Mesh(moboGeo, moboMat);
-            motherboard.position.y = 0;
+            // Posisikan mobo di atas meja, sedikit ke kanan dari tengah
+            motherboard.position.set(rigBasePosition.x + 1.0, rigBasePosition.y + 0.05 / 2, rigBasePosition.z);
             scene.add(motherboard);
-            models['motherboard'] = motherboard;
+            models['motherboard'] = motherboard; // Simpan referensi
 
+            // Buat komponen awal relatif terhadap posisi motherboard baru
             updateComponentModel3D('cpu', gameState.komponen.cpu.level);
             updateComponentModel3D('gpu', gameState.komponen.gpu.level);
             updateComponentModel3D('pendingin', gameState.komponen.pendingin.level);
         }
 
-        /**
-         * Menghapus model lama dan membuat model 3D baru untuk komponen. (Tidak ada perubahan logika di sini)
+       /**
+         * Menghapus & membuat ulang model 3D komponen rig pada posisi yang benar di atas meja.
          */
         function updateComponentModel3D(namaKomponen, levelBaru) {
+            if (!models['motherboard']) return; // Jangan update jika motherboard belum ada
+
+            // Hapus model lama
             if (models[namaKomponen]) {
                 scene.remove(models[namaKomponen]);
-                 if (models[namaKomponen].geometry) models[namaKomponen].geometry.dispose();
-                 if (models[namaKomponen].material) {
+                if (models[namaKomponen].geometry) models[namaKomponen].geometry.dispose();
+                if (models[namaKomponen].material) { /* ... dispose material ... */
                     if (Array.isArray(models[namaKomponen].material)) {
                         models[namaKomponen].material.forEach(material => material.dispose());
                     } else {
                         models[namaKomponen].material.dispose();
                     }
-                 }
+                }
                 delete models[namaKomponen];
             }
 
             let geometry, material, mesh;
-            const position = { x: 0, y: 0.2, z: 0 }; // Posisi dasar Y di atas mobo
-            const scaleBase = 0.5;
+            // Posisi dasar komponen adalah di atas motherboard
+            const basePosition = models['motherboard'].position.clone();
+            basePosition.y += 0.05 / 2; // Titik atas motherboard
+
+            const scaleBase = 0.15; // Skala komponen dibuat lebih kecil agar muat di mobo kecil
 
             switch (namaKomponen) {
-                 case 'cpu':
-                    position.x = -1.5;
-                    position.z = -0.5;
+                case 'cpu':
                     const cpuSize = scaleBase * (1 + (levelBaru - 1) * 0.2);
-                    geometry = new THREE.BoxGeometry(cpuSize, 0.3, cpuSize);
+                    geometry = new THREE.BoxGeometry(cpuSize, 0.1, cpuSize); // Lebih tipis
                     const cpuColors = [0x8d6e63, 0x795548, 0x5d4037];
                     material = new THREE.MeshStandardMaterial({ color: cpuColors[levelBaru - 1] || cpuColors[cpuColors.length-1] });
                     mesh = new THREE.Mesh(geometry, material);
-                    // Atur posisi Y agar dasar menempel di atas motherboard
-                    mesh.position.set(position.x, position.y + 0.3/2, position.z);
+                    // Posisikan CPU di tengah-depan motherboard
+                    mesh.position.set(basePosition.x, basePosition.y + 0.1 / 2, basePosition.z + 0.2);
                     break;
 
                 case 'gpu':
-                    position.x = 1.5;
-                    position.z = 0;
-                    const gpuLength = 1.5 * (1 + (levelBaru - 1) * 0.3);
-                    const gpuHeight = 0.6 * (1 + (levelBaru - 1) * 0.1);
-                    geometry = new THREE.BoxGeometry(0.5, gpuHeight, gpuLength);
+                    const gpuLength = 0.6 * (1 + (levelBaru - 1) * 0.3);
+                    const gpuHeight = 0.2 * (1 + (levelBaru - 1) * 0.1); // Lebih tipis
+                    geometry = new THREE.BoxGeometry(0.15, gpuHeight, gpuLength);
                     const gpuColors = [0x424242, 0x303030, 0x212121];
                     material = new THREE.MeshStandardMaterial({ color: gpuColors[levelBaru - 1] || gpuColors[gpuColors.length-1], roughness: 0.7 });
                     mesh = new THREE.Mesh(geometry, material);
                     mesh.rotation.y = Math.PI / 2;
-                     // Atur posisi Y agar dasar menempel di atas motherboard
-                    mesh.position.set(position.x, position.y + gpuHeight/2, position.z);
+                     // Posisikan GPU di belakang motherboard
+                    mesh.position.set(basePosition.x, basePosition.y + gpuHeight/2, basePosition.z - 0.3);
                     break;
 
                 case 'pendingin':
-                    position.x = -1.5;
-                    position.z = -0.5;
-                    const cpuBaseY = position.y + 0.3; // Posisi atas CPU
-
-                    if (levelBaru === 1) {
-                        geometry = new THREE.CylinderGeometry(0.3, 0.3, 0.2, 16);
-                        material = new THREE.MeshStandardMaterial({ color: 0xb0bec5 });
+                     // Posisi pendingin harus di atas posisi CPU yang baru
+                     if (models['cpu']) {
+                        const cpuTopY = models['cpu'].position.y + 0.1 / 2;
+                        let coolerHeight = 0;
+                        if (levelBaru === 1) {
+                            coolerHeight = 0.1;
+                            geometry = new THREE.CylinderGeometry(scaleBase * 0.8, scaleBase * 0.8, coolerHeight, 12);
+                            material = new THREE.MeshStandardMaterial({ color: 0xb0bec5 });
+                        } else if (levelBaru === 2) {
+                            coolerHeight = 0.3;
+                            geometry = new THREE.BoxGeometry(scaleBase, coolerHeight, scaleBase * 0.8);
+                            material = new THREE.MeshStandardMaterial({ color: 0x78909c });
+                        } else {
+                            coolerHeight = 0.5;
+                            geometry = new THREE.BoxGeometry(scaleBase*1.2, coolerHeight, scaleBase);
+                            material = new THREE.MeshStandardMaterial({ color: 0x546e7a });
+                        }
                         mesh = new THREE.Mesh(geometry, material);
-                         // Atur posisi Y agar dasar menempel di atas CPU
-                        mesh.position.set(position.x, cpuBaseY + 0.2/2, position.z);
-                    } else if (levelBaru === 2) {
-                         geometry = new THREE.BoxGeometry(0.4, 0.8, 0.3);
-                         material = new THREE.MeshStandardMaterial({ color: 0x78909c });
-                         mesh = new THREE.Mesh(geometry, material);
-                         // Atur posisi Y agar dasar menempel di atas CPU
-                         mesh.position.set(position.x, cpuBaseY + 0.8/2, position.z);
-                    } else {
-                         geometry = new THREE.BoxGeometry(0.5, 1.2, 0.4);
-                         material = new THREE.MeshStandardMaterial({ color: 0x546e7a });
-                         mesh = new THREE.Mesh(geometry, material);
-                         // Atur posisi Y agar dasar menempel di atas CPU
-                         mesh.position.set(position.x, cpuBaseY + 1.2/2, position.z);
-                    }
+                        mesh.position.set(models['cpu'].position.x, cpuTopY + coolerHeight / 2, models['cpu'].position.z);
+                     } else {
+                        console.warn("CPU model not found, cannot place cooler.");
+                        return; // Jangan buat cooler jika CPU tidak ada
+                     }
                     break;
-
-                default:
-                    console.warn("Nama komponen tidak dikenal:", namaKomponen);
-                    return;
+                default: return;
             }
 
             scene.add(mesh);
             models[namaKomponen] = mesh;
         }
 
-        /**
-         * Loop render Three.js.
-         */
+
         function animate() {
             requestAnimationFrame(animate);
-            if (controls) controls.update(); // Update kontrol diperlukan jika damping aktif
+            if (controls) controls.update();
             renderer.render(scene, camera);
         }
 
         /**
-         * Menangani perubahan ukuran window untuk kamera ortografik.
+         * Menangani resize untuk layout landscape.
          */
         function onWindowResize() {
-            const container = document.getElementById('canvas-container');
-             if (!container || !camera || !renderer) return; // Pastikan semua sudah diinisialisasi
+             const container = document.getElementById('canvas-container');
+             if (!container || !camera || !renderer) return;
 
+            // Ukuran container 3D (Panel Kiri)
             const width = container.clientWidth;
             const height = container.clientHeight;
 
-            // Update aspek rasio
             aspect = width / height;
-
-            // Update batas frustum kamera ortografik agar skala tampilan tetap
-            // atau menyesuaikan dengan ukuran container
             camera.left   = -frustumSize * aspect / 2;
             camera.right  =  frustumSize * aspect / 2;
             camera.top    =  frustumSize / 2;
             camera.bottom = -frustumSize / 2;
-
-            // Penting: Perbarui matriks proyeksi kamera
             camera.updateProjectionMatrix();
-
-            // Update ukuran renderer
             renderer.setSize(width, height);
         }
 
-
         // ==========================================
-        // EVENT LISTENERS (Tidak berubah)
+        // EVENT LISTENERS
         // ==========================================
         function setupEventListeners() {
+            // Tombol Upgrade
             document.getElementById('upgrade-cpu').addEventListener('click', () => upgradeComponent('cpu'));
             document.getElementById('upgrade-gpu').addEventListener('click', () => upgradeComponent('gpu'));
             document.getElementById('upgrade-pendingin').addEventListener('click', () => upgradeComponent('pendingin'));
+
+            // Tombol Exchange
+            document.getElementById('exchange-button').addEventListener('click', () => {
+                // Tukar semua BTC yang tersedia
+                exchangeBTC(gameState.minedBTC);
+            });
         }
 
         // ==========================================
-        // MULAI GAME SAAT DOM SIAP
+        // MULAI GAME
         // ==========================================
         document.addEventListener('DOMContentLoaded', init);
 
