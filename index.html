@@ -2,605 +2,234 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"> <title>Crypto Miner Tycoon - Landscape</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Crypto Miner Tycoon - NEW UPDATE</title> {/* Judul Diubah */}
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/@popperjs/core@2"></script>
+    <script src="https://unpkg.com/tippy.js@6"></script>
     <style>
-        /* Pastikan body mengambil seluruh tinggi viewport, penting untuk layout flex */
-        html, body {
-            height: 100%;
-            margin: 0;
-            padding: 0;
-            overflow: hidden; /* Mencegah scroll di body utama */
-            font-family: 'Inter', sans-serif;
-        }
-        body {
-            display: flex;
-            flex-direction: column; /* Header di atas, konten di bawah */
-        }
-        /* Kontainer utama untuk layout landscape (3D view | Panel Kanan) */
-        #main-content-wrapper {
-            display: flex;
-            flex-direction: row; /* Konten 3D dan panel kanan berdampingan */
-            flex-grow: 1; /* Ambil sisa tinggi setelah header */
-            height: calc(100% - 64px); /* Sesuaikan jika tinggi header berbeda */
-            overflow: hidden; /* Mencegah scroll */
-        }
-        #left-panel {
-            flex-grow: 1; /* Area 3D mengambil sisa ruang */
-            height: 100%;
-            position: relative; /* Agar canvas bisa absolut di dalamnya jika perlu */
-            overflow: hidden; /* Mencegah overflow internal */
-        }
-        #canvas-container {
-            width: 100%;
-            height: 100%;
-            background-color: #4a5568; /* bg-gray-700 */
-        }
-        #right-panel {
-            width: 300px; /* Lebar tetap untuk panel kanan */
-            height: 100%;
-            display: flex;
-            flex-direction: column;
-            background-color: #2d3748; /* bg-gray-800 */
-            padding: 1rem; /* padding 4 */
-            overflow-y: auto; /* Scroll jika konten melebihi tinggi */
-            border-left: 1px solid #4a5568; /* Garis pemisah */
-        }
-        /* Styling tambahan untuk tombol dan area log di panel kanan */
-        #right-panel button:disabled { opacity: 0.5; cursor: not-allowed; }
-        #log-area { font-size: 0.875rem; /* text-sm */ }
-
-        /* Hide scrollbar for Chrome, Safari and Opera */
-        #right-panel::-webkit-scrollbar { display: none; }
-        /* Hide scrollbar for IE, Edge and Firefox */
-        #right-panel { -ms-overflow-style: none; scrollbar-width: none; }
-
+        /* ... (CSS sama seperti sebelumnya) ... */
+         html, body { height: 100%; margin: 0; padding: 0; overflow: hidden; font-family: 'Inter', sans-serif; }
+         body { display: flex; flex-direction: column; background-color: #111827; }
+         #main-content-wrapper { display: flex; flex-direction: row; flex-grow: 1; height: calc(100% - 72px); overflow: hidden; }
+         #left-panel { flex-grow: 1; height: 100%; position: relative; overflow: hidden; background-color: #374151; }
+         #canvas-container { width: 100%; height: 100%; }
+         #right-panel { width: 350px; height: 100%; display: flex; flex-direction: column; background-color: #1f2937; border-left: 1px solid #4b5563; overflow-y: auto; }
+         #right-panel > section { background-color: #374151; margin: 0.75rem; padding: 0.75rem; border-radius: 0.5rem; box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.2), 0 1px 2px 0 rgba(0, 0, 0, 0.1); flex-shrink: 0; }
+         #log-section { flex-grow: 1; display: flex; flex-direction: column; }
+         #log-area { flex-grow: 1; overflow-y: auto; font-size: 0.75rem; padding-right: 4px; }
+         #right-panel::-webkit-scrollbar, #log-area::-webkit-scrollbar { display: none; }
+         #right-panel, #log-area { -ms-overflow-style: none; scrollbar-width: none; }
+         button:disabled { opacity: 0.5; cursor: not-allowed; }
+         #xp-bar-container { background-color: #4b5563; border-radius: 9999px; overflow: hidden; height: 8px; margin-top: 2px; }
+         #xp-bar { height: 100%; width: 0%; background: linear-gradient(to right, #34d399, #2dd4bf); transition: width 0.5s ease; border-radius: 9999px; }
+         #temp-bar-container { background-color: #4b5563; border-radius: 0.25rem; overflow: hidden; height: 10px; margin-top: 4px; }
+         #temp-bar { height: 100%; width: 0%; background-color: #34d399; transition: width 0.5s ease, background-color 0.5s ease; border-radius: 0.25rem; }
+         .temp-cool { color: #60a5fa; } .temp-warm { color: #fbbf24; } .temp-hot { color: #f87171; } .temp-overheat { color: #ef4444; font-weight: bold; animation: blink 1s linear infinite;}
+         @keyframes blink { 50% { opacity: 0.5; } }
+         .tippy-box[data-theme~='custom'] { background-color: #1f2937; color: #d1d5db; border: 1px solid #4b5563; font-size: 0.75rem; }
+         .tippy-arrow[data-theme~='custom'] { color: #1f2937; }
+         .price-up { color: #10b981; } .price-down { color: #ef4444; } .price-stable { color: #6b7280; }
     </style>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+     <link rel="preconnect" href="https://fonts.googleapis.com">
+     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
 </head>
-<body class="bg-gray-900 text-gray-100">
+<body class="text-gray-100">
 
-    <header class="bg-gray-800 p-3 shadow-md flex justify-around items-center h-16" style="flex-shrink: 0;">
-        <div class="text-center">
-            <span class="text-xs text-gray-400 block">💰 Uang Virtual</span>
-            <span id="uang-virtual" class="font-bold text-lg text-yellow-400">0</span>
-        </div>
-        <div class="text-center">
-            <span class="text-xs text-gray-400 block"> unprocessed</span> <span id="mined-btc" class="font-bold text-lg text-orange-400">0.0000</span> <span class="text-xs">BTC</span> </div>
-        <div class="text-center">
-            <span class="text-xs text-gray-400 block">⚡ Hashrate</span>
-            <span id="total-hashrate" class="font-bold text-lg">0</span> <span class="text-xs">H/s</span>
-        </div>
-         <div class="text-center">
-            <span class="text-xs text-gray-400 block">🌡️ Suhu CPU</span>
-            <span id="suhu-cpu" class="font-bold text-lg">25</span> <span class="text-xs">°C</span>
-        </div>
-        <div id="throttling-status" class="text-center text-red-500 font-medium text-xs" style="display: none;">
-            🔥 OVERHEAT!
-        </div>
+    <header class="bg-gray-800 p-3 shadow-md flex justify-around items-center h-18" style="flex-shrink: 0;">
+        {/* ... Konten Header ... */}
+         <div class="text-center px-2"><span class="text-xs text-gray-400 block">⭐ Level</span><span id="player-level" class="font-bold text-lg text-cyan-400">1</span><div id="xp-bar-container"><div id="xp-bar"></div></div><span id="player-xp-text" class="text-xs text-gray-500">0 / 100 XP</span></div>
+         <div class="text-center border-l border-gray-600 px-3"><span class="text-xs text-gray-400 block">💰 Uang</span><span id="uang-virtual" class="font-bold text-lg text-yellow-400">0</span></div>
+         <div class="text-center border-l border-gray-600 px-3"><span class="text-xs text-gray-400 block">⛏️ BTC</span><span id="mined-btc" class="font-bold text-lg text-orange-400">0.00000</span> <span class="text-xs">BTC</span></div>
+         <div class="text-center border-l border-r border-gray-600 px-3 flex space-x-3"><div><span class="text-xs text-gray-400 block">⚙️ Tech</span><span id="tech-coin" class="font-bold text-lg text-sky-400">0</span></div><div><span class="text-xs text-gray-400 block">💎 Rare</span><span id="rare-coin" class="font-bold text-lg text-fuchsia-400">0</span></div></div>
+         <div class="text-center border-r border-gray-600 px-3"><span class="text-xs text-gray-400 block">⚡ Hashrate</span><span id="total-hashrate" class="font-bold text-lg">0</span> <span class="text-xs">H/s</span></div>
+         <div class="text-center px-2"><span class="text-xs text-gray-400 block">🌡️ Suhu CPU</span><span id="suhu-cpu" class="font-bold text-lg temp-cool">25</span> <span class="text-xs">°C</span><div id="temp-bar-container"><div id="temp-bar"></div></div></div>
+         <div class="text-center border-l border-gray-600 pl-3 pr-1"><span class="text-xs text-gray-400 block">🔌 Daya</span><span id="total-power" class="font-bold text-lg">0</span><span class="text-xs">/</span><span id="max-power" class="font-bold text-lg text-gray-300">300</span><span class="text-xs">W</span></div>
+         <div class="flex flex-col items-start pl-1"><div id="power-warning" class="text-red-500 font-medium text-xs" style="display: none;">⚡OVERLOAD!</div><div id="throttling-status" class="text-red-500 font-medium text-xs" style="display: none;">🔥OVERHEAT!</div></div>
     </header>
 
     <div id="main-content-wrapper">
-
         <div id="left-panel">
             <div id="canvas-container">
-                <div id="loading-indicator" style="position:absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: #cbd5e0;">
-                    Memuat Adegan 3D...
-                </div>
+                 <div id="loading-indicator" style="position:absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: #cbd5e0;">Memuat...</div>
             </div>
         </div>
 
         <aside id="right-panel">
-            <section id="exchange-section" class="mb-6 p-3 bg-gray-700 rounded-lg shadow">
-                <h3 class="text-md font-semibold mb-2 text-teal-300">Exchange BTC</h3>
-                <div class="text-sm mb-2">
-                    <span>Rate: 1 BTC = $</span><span id="exchange-rate" class="font-semibold text-yellow-300">50000</span>
-                </div>
-                <div class="mb-3">
-                    <span class="text-sm text-gray-300">Belum ditukar: </span>
-                    <span id="exchange-available-btc" class="font-bold text-orange-400">0.0000</span> <span class="text-xs">BTC</span>
-                </div>
-                <button id="exchange-button" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold p-2 rounded-lg shadow text-sm transition duration-150 ease-in-out disabled:bg-gray-500">
-                    Tukar Semua BTC
-                </button>
+            <section id="exchange-section"> /* ... */
+                 <h3 class="text-md font-semibold mb-2 text-teal-300 border-b border-gray-600 pb-1">Exchange BTC</h3>
+                 <div class="text-sm my-2 flex justify-between items-center"><span>Rate: 1 BTC =</span><span class="font-semibold text-yellow-300">$<span id="exchange-rate">50000</span><span id="price-trend" class="ml-1 price-stable">→</span></span></div>
+                 <div class="my-2"><span class="text-sm text-gray-300">Available: </span><span id="exchange-available-btc" class="font-bold text-orange-400">0.00000</span> <span class="text-xs">BTC</span></div>
+                 <button id="exchange-button" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold p-2 rounded-lg shadow text-sm transition duration-150 ease-in-out disabled:bg-gray-500">Tukar Semua</button>
+             </section>
+
+            <section id="upgrade-section">
+                 <h3 class="text-md font-semibold mb-3 text-teal-300 border-b border-gray-600 pb-1">Upgrade Rig</h3>
+                {/* Tombol Upgrade */}
+                 <div class="grid grid-cols-2 gap-3">
+                     <button id="upgrade-cpu" data-tippy-content="Upgrade ke: ?" class="bg-teal-600 hover:bg-teal-700 text-white font-bold p-2 rounded-lg shadow text-xs transition duration-150 ease-in-out disabled:bg-gray-500 flex flex-col items-center justify-center h-16"><span class="block text-center text-[11px] leading-tight component-name">CPU Name (Lvl 1)</span><span class="mt-1 text-yellow-300 block text-xs">$<span id="biaya-cpu">100</span></span></button>
+                     <button id="upgrade-gpu" data-tippy-content="Upgrade ke: ?" class="bg-teal-600 hover:bg-teal-700 text-white font-bold p-2 rounded-lg shadow text-xs transition duration-150 ease-in-out disabled:bg-gray-500 flex flex-col items-center justify-center h-16"><span class="block text-center text-[11px] leading-tight component-name">GPU Name (Lvl 1)</span><span class="mt-1 text-yellow-300 block text-xs">$<span id="biaya-gpu">150</span></span></button>
+                     <button id="upgrade-pendingin" data-tippy-content="Upgrade ke: ?" class="bg-blue-600 hover:bg-blue-700 text-white font-bold p-2 rounded-lg shadow text-xs transition duration-150 ease-in-out disabled:bg-gray-500 flex flex-col items-center justify-center h-16"><span class="block text-center text-[11px] leading-tight component-name">Cooler Name (Lvl 1)</span><span class="mt-1 text-yellow-300 block text-xs">$<span id="biaya-pendingin">80</span></span></button>
+                     <button id="upgrade-psu" data-tippy-content="Upgrade ke: ?" class="bg-purple-600 hover:bg-purple-700 text-white font-bold p-2 rounded-lg shadow text-xs transition duration-150 ease-in-out disabled:bg-gray-500 flex flex-col items-center justify-center h-16"><span class="block text-center text-[11px] leading-tight component-name">PSU Name (Lvl 1)</span><span class="mt-1 text-yellow-300 block text-xs">$<span id="biaya-psu">120</span></span></button>
+                 </div>
             </section>
 
-            <section id="upgrade-section" class="mb-6 p-3 bg-gray-700 rounded-lg shadow">
-                <h3 class="text-md font-semibold mb-3 text-teal-300">Upgrade Komponen</h3>
-                <div class="flex flex-col space-y-3">
-                    <button id="upgrade-cpu" class="w-full bg-teal-600 hover:bg-teal-700 text-white font-bold p-2 rounded-lg shadow text-sm transition duration-150 ease-in-out disabled:bg-gray-500">
-                        CPU (Lvl <span id="level-cpu">1</span>) - $ <span id="biaya-cpu">100</span>
-                    </button>
-                    <button id="upgrade-gpu" class="w-full bg-teal-600 hover:bg-teal-700 text-white font-bold p-2 rounded-lg shadow text-sm transition duration-150 ease-in-out disabled:bg-gray-500">
-                        GPU (Lvl <span id="level-gpu">1</span>) - $ <span id="biaya-gpu">150</span>
-                    </button>
-                    <button id="upgrade-pendingin" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold p-2 rounded-lg shadow text-sm transition duration-150 ease-in-out disabled:bg-gray-500">
-                        Pendingin (Lvl <span id="level-pendingin">1</span>) - $ <span id="biaya-pendingin">80</span>
-                    </button>
-                </div>
-            </section>
+             <section id="customize-section"> /* ... */
+                   <h3 class="text-md font-semibold mb-3 text-teal-300 border-b border-gray-600 pb-1">Kustomisasi</h3>
+                   <div class="text-sm mb-2">Warna Karakter:</div><div class="flex space-x-2 mb-3"><button class="w-6 h-6 rounded-full bg-blue-300 border border-gray-400" onclick="changeCharacterColor(0xADD8E6)"></button><button class="w-6 h-6 rounded-full bg-pink-300 border border-gray-400" onclick="changeCharacterColor(0xFFB6C1)"></button><button class="w-6 h-6 rounded-full bg-green-300 border border-gray-400" onclick="changeCharacterColor(0x90EE90)"></button><button class="w-6 h-6 rounded-full bg-gray-400 border border-gray-400" onclick="changeCharacterColor(0xAAAAAA)"></button></div>
+                   <div class="text-sm mb-2">Warna Meja:</div><div class="flex space-x-2"><button class="w-6 h-6 rounded-full bg-yellow-700 border border-gray-400" onclick="changeDeskColor(0x8B4513)"></button><button class="w-6 h-6 rounded-full bg-gray-800 border border-gray-400" onclick="changeDeskColor(0x2F4F4F)"></button><button class="w-6 h-6 rounded-full bg-white border border-gray-400" onclick="changeDeskColor(0xFFFFFF)"></button></div>
+             </section>
 
-            <section id="log-section" class="flex-grow flex flex-col p-3 bg-gray-700 rounded-lg shadow overflow-hidden">
-                <h3 class="text-md font-semibold mb-2 text-teal-300 flex-shrink-0">Log Aktivitas</h3>
-                <div id="log-area" class="flex-grow overflow-y-auto text-xs space-y-1 text-gray-300">
-                    <p>Selamat datang! Mulai mining...</p>
-                </div>
+            <section id="log-section"> /* ... */
+                  <h3 class="text-md font-semibold mb-2 text-teal-300 border-b border-gray-600 pb-1 flex-shrink-0">Log Aktivitas</h3>
+                  <div id="log-area"><p>Game dimuat. Selamat menambang!</p></div>
             </section>
         </aside>
-
     </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://unpkg.com/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+    <script src="https://unpkg.com/@popperjs/core@2"></script>
+    <script src="https://unpkg.com/tippy.js@6"></script>
 
     <script>
         // ==========================================
-        // STATE GAME & KONFIGURASI
+        // GAME STATE & CONFIG
         // ==========================================
-        const gameState = {
-            uangVirtual: 100,
-            minedBTC: 0, // BTC yang sudah ditambang tapi belum ditukar
-            btcExchangeRate: 50000, // Contoh rate: 1 BTC = $50000
-            komponen: {
-                cpu: { level: 1, suhu: 25 },
-                gpu: { level: 1, suhu: 25 },
-                pendingin: { level: 1 },
-                psu: { level: 1 }
-            },
-            maxTemp: 85,
-            isThrottling: false,
-            pendinginEffectiveness: 1,
-            suhuAmbient: 25,
-            hashToBtcRate: 0.000001 // Contoh: 1 H/s menghasilkan 0.000001 BTC per detik
+        const gameState = { /* ... (State sama, sesuaikan rate inflasi jika perlu) ... */
+             uangVirtual: 100, minedBTC: 0, btcExchangeRate: 50000, baseExchangeRate: 50000, rateVolatility: 0.15, rateNoise: 0.03, rateTime: 0, lastRate: 50000, rateUpdateInterval: 5000, lastRateUpdateTime: 0, inflationMultiplier: 1.0, inflationRatePerMinute: 0.003, /* Inflasi sedikit lebih lambat */ lastInflationUpdateTime: 0, playerLevel: 1, playerXP: 0, xpToNextLevel: 100, otherCoins: { techCoin: 0, rareCoin: 0 }, komponen: { cpu: { level: 1, suhu: 25 }, gpu: { level: 1, suhu: 25 }, pendingin: { level: 1 }, psu: { level: 1 } }, maxTemp: 85, isThrottling: false, isPowerOverload: false, pendinginEffectiveness: 1, suhuAmbient: 25, hashToBtcRate: 0.000001, xpPerUangExchanged: 0.05
+         };
+
+        // --- NAMA KOMPONEN (50 per jenis) ---
+        const componentNames = {
+            cpu: [ "Atom Core Basic", "ByteCruncher II", "Silicon Logic C-Series", "HexaCore Starter", "Zenith Compute 5", "Quantum Leap QL-100", "NovaChip Proxima", "Aether Processor 7X", "Chronos Engine CE-3000", "Hyperion Core H9", "Galactic Mind GM-Ultra", "Singularity Chip S1", "Nebula Processing Unit (NPU)", "RiftWalker Xtreme", "Omega Vertex Prime", "Neural Net Weaver NX-1", "AI Cognition Core C2", "Bio-Integrated Logic Unit (BILU)", "Psionic Field Processor PFP-Alpha", "Chrono-Synclastic Infundibulum", "Warp Core Stabilizer WCS-Delta", "Nexus Brain NB-7000", "Apex Computational Engine ACE-X", "Sentient Silicon SS-Mark II", "Reality Fabric Loom RFL-01", "Subspace Thought Matrix STM-9", "Dimensional Gate Processor DGP-Zeta", "Causal Loop Optimizer CLO-Prime", "Echo Core Harmonizer ECH-X12", "Void Logic Construct VLC-Omega", "Hyper-Dimensional Array HDA-50", "Quantum Entanglement CPU (QE-CPU)", "Singularity Function Core SFC-Final", "Temporal Flux Processor TFP-99", "Zero-Point Computation Node ZPCN", "Akashic Record Access Chip ARAC", "Collective Unconscious Interface CUI-1", "Meta-Cognitive Processor MCP-X", "Reality Pattern Engine RPE-Max", "Universal Constructor UC-01", "Omega Point Processor OPP-Finality", "Hyper-Causal Determinant HCD", "Architect Mind Core AMC-Zero", "Logic Weaver Prime LWP", "Sentience Hub SH-Ultimate", "God-Machine Interface GMI-00", "Reality Core RC-Absolute", "The Oracle Engine", "Nexus of All Thought", "The Final Computation" ],
+            gpu: [ "PixelFlow Lite", "RenderMax R1", "Vector Prime V-200", "ShaderStorm SSX", "CryptoHash CH-50", "RayWeaver Pro", "Matrix Engine ME-750", "Photon Blaster PB-900X", "DeepMine DM-Elite", "TerraHash T-Rex", "VoidRender VR-Ultimate", "Quantum Graphics QG-Titan", "Celestial Forge CF-Max", "WarpDrive WD-Extreme", "Infinity Matrix IM-Omega", "Crypto-Flux Condenser CFC-9000", "Hash Ripper HR-Xtreme", "Dimensional Shader DS-Alpha", "Light Bender LB-Pro Max", "Reality Canvas RC-Elite", "Subspace Miner SM-Ultra", "Quantum Hash Generator QHG-1", "Aetherium Filter AF-77", "Chrono-Miner CM-X", "Singularity Hash Unit SHU-Prime", "Void Particle Accelerator VPA-Hash", "Photon Stream Miner PSM-X10", "Entropy Reversal Engine (Mining)", "Celestial Hash Array CHA-Max", "Warp Field Miner WFM-Omega", "Zero-Point Hash Extractor ZPHE", "Reality Algorithm Solver RAS-9", "Hyper-Dimensional Render HDR-Final", "Quantum Foam Stabilizer (Mining)", "Meta-Material Hash Core MMHC", "Universal Ledger Access ULA-X", "Crypto-Dimensional Key CDK-Prime", "The Hash Oracle", "Reality Mining Engine RME-Max", "Void Currency Generator VCG-01", "Omega Hash Condenser OHC", "Architect Mining Array AMA-Zero", "Infinite Hash Stream IHS", "Reality Forge RF-Crypto", "The Ledger Locksmith", "God-Hand Mining Unit GMU", "Absolute Hash Rate AHR-Device", "The Crypto Singularity", "Nexus of Digital Wealth", "The Final Hash" ],
+            cooler: [ "AeroFlow Basic Fan", "CoolBreeze Tower S", "IceWind Heatsink Pro", "Arctic Chill AC-120", "Vortex Liquid V L-240", "CryoStream CS-360 Elite", "SubZero Module SZ-1", "ThermoGuard TG-X", "FrostByte Integrated Loop", "HydroChill MaxFlow", "Glacial Core GC-Pro", "Zephyr Cooling System ZCS", "Avalanche Direct Die", "Nimbus Immersion Unit", "Absolute Zero Engine AZE", "Phase Change Injector PCI-Mark II", "Quantum Tunneling Cooler QTC-1", "Zero-Point Energy Sink ZPES", "Cryo-Stasis Field Generator CSF-Alpha", "Atmospheric Heat Exchanger AHX-Industrial", "Geo-Thermal Vent Cooler GTVC-1", "Subspace Heat Displacement Unit SHDU", "Void Cooling Matrix VCM-Elite", "Entropy Reduction System ERS-Pro", "Chrono-Freeze Module CFM-X", "Plasma Coolant Loop PCL-9000", "Hyper-Conductive Lattice HCL-Max", "Singularity Heat Nullifier SHN-1", "Quantum Foam Thermal Regulator QFTR", "Temporal Stasis Cooler TSC-Omega", "Absolute Entropy Annihilator AEA", "Dimensional Heat Siphon DHS-Pro", "Celestial Ice Core CIC-Max", "Warp Core Coolant Injector WCCI", "Zero Kelvin Generator ZKG-Final", "Akashic Thermal Regulator ATR", "Void Energy Dissipator VED-X", "Meta-Stable Coolant MSC-Prime", "Reality Thermal Stabilizer RTS-Max", "Universal Heat Sink UHS-01", "Omega Freeze OF-System", "Hyper-Spatial Cooler HSC", "Architect Thermal Control ATC-Zero", "Cryo-Dimension Stabilizer CDS", "The Heat Death Inhibitor", "God-Tier Cooling Array GTCA", "Absolute Zero Field AZF", "The Entropy Engine", "Nexus of Cold", "The Final Chill" ],
+            psu: [ "Volt Basic 300W", "PowerBrick Bronze 550W", "StableWatt Silver 750W", "JuiceBox Gold 850W", "EnergyCore Platinum 1000W", "Ampere Reactor AR-1200 Titanium", "PowerForge PF-1600 Pro", "Electron Stream ES-Max", "Quantum Grid QG-2000", "Dynamo Engine DE-Ultra", "Fusion Power Module FPM", "Stellar Core SC-Xtreme", "PowerMatrix PM-Industrial", "Singularity Conduit SC-Omega", "Infinite Current Engine ICE", "Zero-Point Energy Tap ZPET-1", "Antimatter Reactor Core ARC-Alpha", "Dyson Sphere Link DSL-Micro", "Void Energy Converter VEC-Pro", "Quantum Fluctuation Rectifier QFR", "Chrono-Energy Accumulator CEA-X", "Subspace Power Relay SPR-9000", "Plasma Fusion Generator PFG-Elite", "Hyper-Dimensional Capacitor HDC-Max", "Singularity Power Source SPS-Prime", "Entropy Drive ED-Power", "Celestial Energy Forge CEF-Ultra", "Warp Core Power Tap WCPT-1", "Reality Energy Matrix REM-Omega", "Temporal Power Conduit TPC-Final", "Absolute Energy Generator AEG", "Dimensional Power Siphon DPS-X", "Quantum Grid Stabilizer QGS-Max", "Zero-Point Field Modulator ZPFM", "Meta-Energy Transducer MET-Prime", "Akashic Energy Channel AEC", "Void Power Well VPW-01", "Universal Power Core UPC-X", "Reality Power Plant RPP-Max", "Omega Grid OG-Interface", "Hyper-Spatial Energy Node HSEN", "Architect Power System APS-Zero", "Infinite Energy Loop IEL", "Reality Energy Forge REF", "The Power Singularity", "God-Machine Power Core GMPC", "Absolute Power Source APS-Final", "The Energy Nexus", "Source of All Power", "The Final Watt" ]
         };
+        // ---------------------------------------
 
-        const tiers = { // Data komponen per level (hashrate, power, heat)
-            cpu: [{ level: 1, hashrate: 10, power: 50, heat: 5 }, { level: 2, hashrate: 25, power: 70, heat: 8 }, { level: 3, hashrate: 60, power: 100, heat: 12 }],
-            gpu: [{ level: 1, hashrate: 20, power: 100, heat: 15 }, { level: 2, hashrate: 50, power: 150, heat: 25 }, { level: 3, hashrate: 120, power: 220, heat: 40 }],
-            pendingin: [{ level: 1, dissipation: 1.0 }, { level: 2, dissipation: 1.5 }, { level: 3, dissipation: 2.2 }],
-            psu: [{ level: 1, maxPower: 300 }, { level: 2, maxPower: 500 }]
-        };
+        // --- FUNGSI GENERATOR STATS TIERS ---
+        function generateTierStats(level, type) {
+            const names = componentNames[type];
+            const name = names[level - 1] || `${type} Level ${level}`; // Fallback name
+            let stats = { level, name };
+            let colorHue = (level / 50) * 300; // Hue dari 0 (merah) ke 300 (magenta/ungu)
 
-        const hargaUpgrade = { // Biaya upgrade awal dan multiplier
-            cpu: { baseCost: 100, multiplier: 1.8 },
-            gpu: { baseCost: 150, multiplier: 2.0 },
-            pendingin: { baseCost: 80, multiplier: 1.6 }
-        };
+            // Gunakan kurva pangkat, tapi eksponennya melambat seiring level
+            // Power_Exponent = Base_Exp * (1 - Level_Factor * log(Level))
+            // Level_Factor kecil agar penurunan eksponen lambat
+            const levelFactor = 0.05; // Seberapa cepat eksponen turun
+            const logLevel = level > 1 ? Math.log(level) : 0;
 
-        // Fungsi helper
-        function getCurrentTier(namaKomponen) { /* ... (sama seperti sebelumnya) ... */
-            const level = gameState.komponen[namaKomponen].level;
-            const tierData = tiers[namaKomponen].find(t => t.level === level);
-            return tierData || tiers[namaKomponen][tiers[namaKomponen].length - 1];
-         }
-        function getNextUpgradeCost(namaKomponen) { /* ... (sama seperti sebelumnya) ... */
-            const levelSaatIni = gameState.komponen[namaKomponen].level;
-            const config = hargaUpgrade[namaKomponen];
-            return Math.ceil(config.baseCost * Math.pow(config.multiplier, levelSaatIni -1));
-        }
-
-        // Variabel global Three.js
-        let scene, camera, renderer, controls;
-        let models = {}; // Menyimpan referensi mesh komponen rig
-        let environmentModels = {}; // Menyimpan referensi mesh lingkungan (meja, kursi, dll)
-        let aspect, frustumSize = 20; // Sesuaikan untuk zoom awal dengan scene baru yang lebih besar
-
-        // Posisi relatif rig di atas meja
-        const rigBasePosition = new THREE.Vector3(0, 0.8, 0); // X, Y (di atas meja), Z
-
-        // ==========================================
-        // FUNGSI INTI GAME
-        // ==========================================
-        function init() {
-            console.log("Memulai inisialisasi game (Landscape)...");
-            setupThreeJS();
-            createEnvironmentModels(); // Buat meja, kursi, dll dulu
-            createInitialModels(); // Buat rig di atas meja
-            updateUI();
-            setInterval(updateGameState, 1000);
-            animate();
-            setupEventListeners();
-            addLogMessage("Game dimuat. Mode Landscape Aktif. Mulai mining BTC!");
-            console.log("Inisialisasi selesai.");
-        }
-
-        function updateGameState() {
-            const cpuTier = getCurrentTier('cpu');
-            const gpuTier = getCurrentTier('gpu');
-            const pendinginTier = getCurrentTier('pendingin');
-            let totalHashrate = cpuTier.hashrate + gpuTier.hashrate;
-            const totalPower = cpuTier.power + gpuTier.power;
-            const heatGenerated = cpuTier.heat + gpuTier.heat;
-            const heatDissipated = (gameState.komponen.cpu.suhu - gameState.suhuAmbient) * pendinginTier.dissipation * gameState.pendinginEffectiveness;
-            const deltaSuhu = heatGenerated - heatDissipated;
-            gameState.komponen.cpu.suhu += deltaSuhu * 0.05;
-            gameState.komponen.cpu.suhu = Math.max(gameState.suhuAmbient, gameState.komponen.cpu.suhu);
-
-            // Logika Throttling
-            const throttlingElement = document.getElementById('throttling-status');
-            if (gameState.komponen.cpu.suhu > gameState.maxTemp) {
-                const overheatFactor = (gameState.komponen.cpu.suhu - gameState.maxTemp) / 10;
-                const throttleMultiplier = Math.max(0.1, 1 - overheatFactor);
-                totalHashrate *= throttleMultiplier;
-                gameState.isThrottling = true;
-                if (throttlingElement) throttlingElement.style.display = 'block';
-            } else {
-                gameState.isThrottling = false;
-                 if (throttlingElement) throttlingElement.style.display = 'none';
-            }
-
-            // --- Perubahan Utama: Hitung BTC, bukan langsung Uang ---
-            const btcMinedPerSecond = totalHashrate * gameState.hashToBtcRate;
-            gameState.minedBTC += btcMinedPerSecond;
-            // gameState.uangVirtual += profitPerDetik; // Hapus baris ini
-
-            updateUI(totalHashrate, totalPower); // Kirim hashrate & power ke UI
-        }
-
-        /**
-         * Menukarkan sejumlah BTC menjadi Uang Virtual.
-         * @param {number} amountToExchange - Jumlah BTC yang ingin ditukar.
-         */
-        function exchangeBTC(amountToExchange) {
-            if (amountToExchange <= 0 || isNaN(amountToExchange)) {
-                addLogMessage("Jumlah BTC untuk ditukar tidak valid.", 'error');
-                return;
-            }
-            if (amountToExchange > gameState.minedBTC) {
-                 addLogMessage("BTC yang dimiliki tidak cukup untuk ditukar.", 'error');
-                 return;
-            }
-
-            const uangGained = amountToExchange * gameState.btcExchangeRate;
-            gameState.minedBTC -= amountToExchange;
-            gameState.uangVirtual += uangGained;
-
-            addLogMessage(`Berhasil menukar ${amountToExchange.toFixed(8)} BTC menjadi $${uangGained.toFixed(2)}`, 'success');
-            console.log(`Exchanged ${amountToExchange} BTC for ${uangGained} Uang Virtual.`);
-
-            updateUI(); // Perbarui tampilan UI setelah exchange
-        }
-
-
-        function upgradeComponent(namaKomponen) {
-            // ... (Logika upgrade sama seperti sebelumnya, cek uang, level up, update 3D)
-            const biayaUpgrade = getNextUpgradeCost(namaKomponen);
-            const nextLevel = gameState.komponen[namaKomponen].level + 1;
-            const maxLevel = tiers[namaKomponen].length;
-
-            if (nextLevel > maxLevel) { /* ... Pesan Max Level ... */ addLogMessage(`Komponen ${namaKomponen.toUpperCase()} sudah mencapai level maksimum!`, 'warning'); return; }
-            if (gameState.uangVirtual >= biayaUpgrade) {
-                gameState.uangVirtual -= biayaUpgrade;
-                gameState.komponen[namaKomponen].level = nextLevel;
-                if (namaKomponen === 'pendingin') { gameState.pendinginEffectiveness = getCurrentTier('pendingin').dissipation; }
-                updateComponentModel3D(namaKomponen, nextLevel); // Panggil update 3D
-                addLogMessage(`Upgrade ${namaKomponen.toUpperCase()} ke Lvl ${nextLevel} berhasil! (-$${biayaUpgrade.toFixed(0)})`, 'success');
-                updateUI();
-            } else { /* ... Pesan Uang Kurang ... */ addLogMessage(`Uang tidak cukup untuk upgrade ${namaKomponen.toUpperCase()}. Butuh $${biayaUpgrade.toFixed(0)}.`, 'error'); }
-        }
-
-        function updateUI(currentHashrate, currentPower) {
-            // Update Header Stats
-            document.getElementById('uang-virtual').textContent = gameState.uangVirtual.toFixed(2);
-            document.getElementById('mined-btc').textContent = gameState.minedBTC.toFixed(8); // Tampilkan 8 desimal untuk BTC
-            document.getElementById('total-hashrate').textContent = (currentHashrate !== undefined ? currentHashrate : (getCurrentTier('cpu').hashrate + getCurrentTier('gpu').hashrate)).toFixed(1);
-            document.getElementById('suhu-cpu').textContent = gameState.komponen.cpu.suhu.toFixed(1);
-
-            // Update Panel Kanan - Exchange
-            document.getElementById('exchange-rate').textContent = gameState.btcExchangeRate.toLocaleString(); // Format angka rate
-            document.getElementById('exchange-available-btc').textContent = gameState.minedBTC.toFixed(8);
-            document.getElementById('exchange-button').disabled = gameState.minedBTC <= 0; // Nonaktifkan jika tidak ada BTC
-
-            // Update Panel Kanan - Tombol Upgrade
-            ['cpu', 'gpu', 'pendingin'].forEach(comp => {
-                const level = gameState.komponen[comp].level;
-                const maxLevel = tiers[comp].length;
-                const btn = document.getElementById(`upgrade-${comp}`);
-                const levelSpan = document.getElementById(`level-${comp}`);
-                const biayaSpan = document.getElementById(`biaya-${comp}`);
-
-                levelSpan.textContent = level;
-                if (level < maxLevel) {
-                    const biaya = getNextUpgradeCost(comp);
-                    biayaSpan.textContent = biaya.toFixed(0);
-                    btn.disabled = gameState.uangVirtual < biaya;
-                    // Update teks tombol (lebih ringkas)
-                    btn.childNodes[0].nodeValue = `${comp.toUpperCase()} (Lvl ${level}) - $`; // Nama komponen (LEVEL) - $
-                } else {
-                    biayaSpan.textContent = "MAX";
-                    btn.disabled = true;
-                    btn.childNodes[0].nodeValue = `${comp.toUpperCase()} (MAX) - $`; // Nama komponen (MAX) - $
-                }
-            });
-        }
-
-        function addLogMessage(message, type = 'info') {
-            // ... (Fungsi log sama seperti sebelumnya) ...
-             const logArea = document.getElementById('log-area');
-            if (!logArea) return; // Cek jika log area ada
-            const newMessage = document.createElement('p');
-            newMessage.textContent = message;
             switch (type) {
-                case 'success': newMessage.className = 'text-green-400'; break;
-                case 'warning': newMessage.className = 'text-yellow-400'; break;
-                case 'error': newMessage.className = 'text-red-400'; break;
-                default: newMessage.className = 'text-gray-300';
-            }
-            logArea.appendChild(newMessage);
-            logArea.scrollTop = logArea.scrollHeight;
-            const maxLogs = 30; // Tambah kapasitas log
-            if (logArea.children.length > maxLogs) {
-                logArea.removeChild(logArea.firstChild);
-            }
-        }
-
-        // ==========================================
-        // FUNGSI THREE.JS (Scene, Kamera, Model)
-        // ==========================================
-        function setupThreeJS() {
-            const container = document.getElementById('canvas-container');
-            if (!container) return;
-
-            scene = new THREE.Scene();
-            scene.background = new THREE.Color(0x4a5568); // bg-gray-700
-
-            aspect = container.clientWidth / container.clientHeight;
-            frustumSize = 20; // Mungkin perlu lebih besar karena ada meja+kursi
-            camera = new THREE.OrthographicCamera(frustumSize * aspect / -2, frustumSize * aspect / 2, frustumSize / 2, frustumSize / -2, 1, 1000);
-            const camDistance = 18; // Jarak kamera mungkin perlu disesuaikan
-            camera.position.set(camDistance * 0.8, camDistance * 0.7, camDistance); // Sesuaikan sudut sedikit
-            // Fokus kamera sedikit lebih tinggi dan ke belakang dari meja
-            const lookAtPosition = new THREE.Vector3(0, 1.5, -1);
-            camera.lookAt(lookAtPosition);
-            camera.updateProjectionMatrix();
-
-            renderer = new THREE.WebGLRenderer({ antialias: true });
-            renderer.setSize(container.clientWidth, container.clientHeight);
-            renderer.setPixelRatio(window.devicePixelRatio);
-            container.appendChild(renderer.domElement);
-            const loadingIndicator = document.getElementById('loading-indicator');
-            if (loadingIndicator) loadingIndicator.remove();
-
-            // Pencahayaan
-            const ambientLight = new THREE.AmbientLight(0xcccccc, 0.8);
-            scene.add(ambientLight);
-            const directionalLight = new THREE.DirectionalLight(0xffffff, 1.0);
-            directionalLight.position.set(15, 20, 10); // Arah cahaya utama
-            directionalLight.target.position.copy(lookAtPosition); // Targetkan cahaya ke titik fokus
-            scene.add(directionalLight);
-            scene.add(directionalLight.target); // Target harus di scene agar lookAt bekerja
-
-            // Kontrol
-            controls = new THREE.OrbitControls(camera, renderer.domElement);
-            controls.enableDamping = true;
-            controls.dampingFactor = 0.1;
-            // controls.enableRotate = false; // Tetap biarkan bisa rotasi untuk melihat-lihat
-            controls.screenSpacePanning = true;
-            controls.target.copy(lookAtPosition);
-            controls.maxPolarAngle = Math.PI / 1.8; // Batasi sudut lihat ke bawah
-            controls.minZoom = 0.5; // Batas zoom out orthographic
-            controls.maxZoom = 3;   // Batas zoom in orthographic
-            controls.update();
-
-            window.addEventListener('resize', onWindowResize, false);
-        }
-
-        /**
-         * Membuat model 3D untuk lingkungan (meja, kursi, monitor, karakter placeholder).
-         */
-        function createEnvironmentModels() {
-            const deskHeight = 0.8;
-            const deskWidth = 4;
-            const deskDepth = 2;
-
-            // Meja (coklat)
-            const deskGeo = new THREE.BoxGeometry(deskWidth, deskHeight, deskDepth);
-            const deskMat = new THREE.MeshStandardMaterial({ color: 0x8B4513, roughness: 0.8 }); // SaddleBrown
-            const desk = new THREE.Mesh(deskGeo, deskMat);
-            desk.position.y = deskHeight / 2; // Dasar meja di Y=0
-            scene.add(desk);
-            environmentModels['desk'] = desk;
-
-             // Kursi (abu-abu gelap)
-            const chairSeatGeo = new THREE.BoxGeometry(1, 0.2, 1);
-            const chairBackGeo = new THREE.BoxGeometry(1, 1.2, 0.2);
-            const chairMat = new THREE.MeshStandardMaterial({ color: 0x404040, roughness: 0.7 });
-            const chairSeat = new THREE.Mesh(chairSeatGeo, chairMat);
-            const chairBack = new THREE.Mesh(chairBackGeo, chairMat);
-            chairSeat.position.set(0, deskHeight * 0.6, deskDepth / 2 + 0.6); // Depan meja, sedikit ke belakang
-            chairBack.position.set(0, chairSeat.position.y + 1.2 / 2, chairSeat.position.z + 1 / 2 - 0.2 / 2); // Belakang & atas dudukan
-            scene.add(chairSeat);
-            scene.add(chairBack);
-            environmentModels['chairSeat'] = chairSeat;
-            environmentModels['chairBack'] = chairBack;
-
-            // Karakter Placeholder (biru muda)
-            const charBodyGeo = new THREE.BoxGeometry(0.6, 0.9, 0.5);
-            const charHeadGeo = new THREE.SphereGeometry(0.3, 16, 16);
-            const charMat = new THREE.MeshStandardMaterial({ color: 0xADD8E6 }); // LightBlue
-            const charBody = new THREE.Mesh(charBodyGeo, charMat);
-            const charHead = new THREE.Mesh(charHeadGeo, charMat);
-            // Posisikan badan di atas kursi
-            charBody.position.set(chairSeat.position.x, chairSeat.position.y + 0.2/2 + 0.9/2, chairSeat.position.z);
-            // Posisikan kepala di atas badan
-            charHead.position.set(charBody.position.x, charBody.position.y + 0.9/2 + 0.3, charBody.position.z);
-            scene.add(charBody);
-            scene.add(charHead);
-            environmentModels['characterBody'] = charBody;
-            environmentModels['characterHead'] = charHead;
-
-            // Monitor Placeholder (hitam)
-            const monitorScreenGeo = new THREE.BoxGeometry(1.5, 0.9, 0.1);
-            const monitorStandGeo = new THREE.BoxGeometry(0.3, 0.2, 0.3);
-            const monitorMat = new THREE.MeshStandardMaterial({ color: 0x1a1a1a, roughness: 0.2 });
-            const monitorScreen = new THREE.Mesh(monitorScreenGeo, monitorMat);
-            const monitorStand = new THREE.Mesh(monitorStandGeo, monitorMat);
-            // Stand di atas meja
-            monitorStand.position.set(0, deskHeight + 0.2/2, -deskDepth / 2 + 0.5);
-            // Layar di atas stand
-            monitorScreen.position.set(monitorStand.position.x, monitorStand.position.y + 0.2/2 + 0.9/2, monitorStand.position.z);
-            scene.add(monitorStand);
-            scene.add(monitorScreen);
-            environmentModels['monitorScreen'] = monitorScreen;
-            environmentModels['monitorStand'] = monitorStand;
-
-             // Update rigBasePosition Y agar sesuai tinggi meja
-             rigBasePosition.y = deskHeight;
-        }
-
-
-        /**
-         * Membuat model 3D awal untuk komponen rig di atas meja.
-         */
-        function createInitialModels() {
-            // Motherboard (alas rig) di atas meja
-            const moboGeo = new THREE.BoxGeometry(1.5, 0.05, 1); // Lebih kecil
-            const moboMat = new THREE.MeshStandardMaterial({ color: 0x004d40 });
-            const motherboard = new THREE.Mesh(moboGeo, moboMat);
-            // Posisikan mobo di atas meja, sedikit ke kanan dari tengah
-            motherboard.position.set(rigBasePosition.x + 1.0, rigBasePosition.y + 0.05 / 2, rigBasePosition.z);
-            scene.add(motherboard);
-            models['motherboard'] = motherboard; // Simpan referensi
-
-            // Buat komponen awal relatif terhadap posisi motherboard baru
-            updateComponentModel3D('cpu', gameState.komponen.cpu.level);
-            updateComponentModel3D('gpu', gameState.komponen.gpu.level);
-            updateComponentModel3D('pendingin', gameState.komponen.pendingin.level);
-        }
-
-       /**
-         * Menghapus & membuat ulang model 3D komponen rig pada posisi yang benar di atas meja.
-         */
-        function updateComponentModel3D(namaKomponen, levelBaru) {
-            if (!models['motherboard']) return; // Jangan update jika motherboard belum ada
-
-            // Hapus model lama
-            if (models[namaKomponen]) {
-                scene.remove(models[namaKomponen]);
-                if (models[namaKomponen].geometry) models[namaKomponen].geometry.dispose();
-                if (models[namaKomponen].material) { /* ... dispose material ... */
-                    if (Array.isArray(models[namaKomponen].material)) {
-                        models[namaKomponen].material.forEach(material => material.dispose());
-                    } else {
-                        models[namaKomponen].material.dispose();
-                    }
-                }
-                delete models[namaKomponen];
-            }
-
-            let geometry, material, mesh;
-            // Posisi dasar komponen adalah di atas motherboard
-            const basePosition = models['motherboard'].position.clone();
-            basePosition.y += 0.05 / 2; // Titik atas motherboard
-
-            const scaleBase = 0.15; // Skala komponen dibuat lebih kecil agar muat di mobo kecil
-
-            switch (namaKomponen) {
                 case 'cpu':
-                    const cpuSize = scaleBase * (1 + (levelBaru - 1) * 0.2);
-                    geometry = new THREE.BoxGeometry(cpuSize, 0.1, cpuSize); // Lebih tipis
-                    const cpuColors = [0x8d6e63, 0x795548, 0x5d4037];
-                    material = new THREE.MeshStandardMaterial({ color: cpuColors[levelBaru - 1] || cpuColors[cpuColors.length-1] });
-                    mesh = new THREE.Mesh(geometry, material);
-                    // Posisikan CPU di tengah-depan motherboard
-                    mesh.position.set(basePosition.x, basePosition.y + 0.1 / 2, basePosition.z + 0.2);
+                    const cpuHashExp = Math.max(1.0, 1.8 - levelFactor * 2 * logLevel);
+                    const cpuPowerExp = Math.max(1.0, 1.85 - levelFactor * 1.8 * logLevel);
+                    const cpuHeatExp = Math.max(1.0, 1.82 - levelFactor * 1.9 * logLevel);
+                    stats.hashrate = Math.floor(10 * Math.pow(level, cpuHashExp));
+                    stats.power = Math.floor(50 * Math.pow(level, cpuPowerExp));
+                    stats.heat = Math.floor(5 * Math.pow(level, cpuHeatExp));
+                    stats.color = new THREE.Color(`hsl(${colorHue}, 70%, 60%)`).getHex();
                     break;
-
                 case 'gpu':
-                    const gpuLength = 0.6 * (1 + (levelBaru - 1) * 0.3);
-                    const gpuHeight = 0.2 * (1 + (levelBaru - 1) * 0.1); // Lebih tipis
-                    geometry = new THREE.BoxGeometry(0.15, gpuHeight, gpuLength);
-                    const gpuColors = [0x424242, 0x303030, 0x212121];
-                    material = new THREE.MeshStandardMaterial({ color: gpuColors[levelBaru - 1] || gpuColors[gpuColors.length-1], roughness: 0.7 });
-                    mesh = new THREE.Mesh(geometry, material);
-                    mesh.rotation.y = Math.PI / 2;
-                     // Posisikan GPU di belakang motherboard
-                    mesh.position.set(basePosition.x, basePosition.y + gpuHeight/2, basePosition.z - 0.3);
+                    const gpuHashExp = Math.max(1.0, 1.9 - levelFactor * 1.5 * logLevel);
+                    const gpuPowerExp = Math.max(1.0, 2.0 - levelFactor * 1.5 * logLevel);
+                    const gpuHeatExp = Math.max(1.0, 1.95 - levelFactor * 1.6 * logLevel);
+                    stats.hashrate = Math.floor(20 * Math.pow(level, gpuHashExp));
+                    stats.power = Math.floor(100 * Math.pow(level, gpuPowerExp));
+                    stats.heat = Math.floor(15 * Math.pow(level, gpuHeatExp));
+                    stats.fans = Math.min(4, Math.floor(level / 8)); // Max 4 kipas, tambah 1 setiap 8 level
+                    stats.color = new THREE.Color(`hsl(${colorHue + 40 % 360}, 60%, 50%)`).getHex(); // Warna sedikit beda
                     break;
-
                 case 'pendingin':
-                     // Posisi pendingin harus di atas posisi CPU yang baru
-                     if (models['cpu']) {
-                        const cpuTopY = models['cpu'].position.y + 0.1 / 2;
-                        let coolerHeight = 0;
-                        if (levelBaru === 1) {
-                            coolerHeight = 0.1;
-                            geometry = new THREE.CylinderGeometry(scaleBase * 0.8, scaleBase * 0.8, coolerHeight, 12);
-                            material = new THREE.MeshStandardMaterial({ color: 0xb0bec5 });
-                        } else if (levelBaru === 2) {
-                            coolerHeight = 0.3;
-                            geometry = new THREE.BoxGeometry(scaleBase, coolerHeight, scaleBase * 0.8);
-                            material = new THREE.MeshStandardMaterial({ color: 0x78909c });
-                        } else {
-                            coolerHeight = 0.5;
-                            geometry = new THREE.BoxGeometry(scaleBase*1.2, coolerHeight, scaleBase);
-                            material = new THREE.MeshStandardMaterial({ color: 0x546e7a });
-                        }
-                        mesh = new THREE.Mesh(geometry, material);
-                        mesh.position.set(models['cpu'].position.x, cpuTopY + coolerHeight / 2, models['cpu'].position.z);
-                     } else {
-                        console.warn("CPU model not found, cannot place cooler.");
-                        return; // Jangan buat cooler jika CPU tidak ada
-                     }
+                    const coolDissipationExp = Math.max(1.0, 2.2 - levelFactor * 1.2 * logLevel); // Harus > heat
+                    stats.dissipation = parseFloat((1.0 * Math.pow(level, coolDissipationExp)).toFixed(1));
+                    stats.color = new THREE.Color(`hsl(${colorHue + 180 % 360}, 50%, 70%)`).getHex(); // Warna dingin
                     break;
-                default: return;
+                case 'psu':
+                    const psuMaxPowerExp = Math.max(1.0, 2.3 - levelFactor * 1.0 * logLevel); // Harus > total power
+                    stats.maxPower = Math.floor(300 * Math.pow(level, psuMaxPowerExp));
+                     // Warna PSU bisa lebih bervariasi atau spesifik
+                     const psuColors = [0x424242, 0xcd7f32, 0xc0c0c0, 0xffd700, 0xe5e4e2, 0xb0c4de]; // Basic, Bronze, Silver, Gold, Plat, Titanium
+                    stats.color = psuColors[Math.min(psuColors.length - 1, Math.floor(level / 8))] || 0x333333; // Warna berdasarkan tier kasar
+                    break;
             }
-
-            scene.add(mesh);
-            models[namaKomponen] = mesh;
+            return stats;
         }
 
-
-        function animate() {
-            requestAnimationFrame(animate);
-            if (controls) controls.update();
-            renderer.render(scene, camera);
+        // --- BUAT OBJEK TIERS SECARA OTOMATIS ---
+        const tiers = {};
+        for (const type in componentNames) {
+            tiers[type] = [];
+            for (let i = 1; i <= 50; i++) {
+                tiers[type].push(generateTierStats(i, type));
+            }
         }
+        console.log("Generated Tiers:", tiers); // Untuk debug cek data tiers
+        // ---------------------------------------
 
-        /**
-         * Menangani resize untuk layout landscape.
-         */
-        function onWindowResize() {
-             const container = document.getElementById('canvas-container');
-             if (!container || !camera || !renderer) return;
+        const hargaUpgrade = { // Sesuaikan multiplier lagi?
+             cpu: { baseCost: 100, multiplier: 1.70 },
+             gpu: { baseCost: 150, multiplier: 1.75 },
+             pendingin: { baseCost: 80, multiplier: 1.65 },
+             psu: { baseCost: 120, multiplier: 1.72 }
+         };
 
-            // Ukuran container 3D (Panel Kiri)
-            const width = container.clientWidth;
-            const height = container.clientHeight;
+        // Level Up Functions (sama)
+        function calculateXPForLevel(level) { return Math.floor(100 * Math.pow(level, 1.7)); } // XP lebih banyak lagi
+        function getCoinsForLevelUp(level) { return { techCoin: level * 3 + Math.floor(Math.random() * level * 2), rareCoin: Math.floor(level / 3) + (level % 10 === 0 ? 2 : 0) }; } // Reward lebih besar
+        function addXP(amount) { if (amount <= 0) return; gameState.playerXP += amount; addLogMessage(`+${amount.toFixed(0)} XP`, 'xp'); while (gameState.playerXP >= gameState.xpToNextLevel) { levelUp(); } updateUI(); }
+        function levelUp() { gameState.playerXP -= gameState.xpToNextLevel; gameState.playerLevel++; gameState.xpToNextLevel = calculateXPForLevel(gameState.playerLevel); const rewards = getCoinsForLevelUp(gameState.playerLevel); gameState.otherCoins.techCoin += rewards.techCoin; gameState.otherCoins.rareCoin += rewards.rareCoin; addLogMessage(`🎉 LEVEL UP! Lv ${gameState.playerLevel}!`, 'levelup'); addLogMessage(`🎁 Hadiah: ${rewards.techCoin} Tech, ${rewards.rareCoin} Rare!`, 'reward'); }
 
-            aspect = width / height;
-            camera.left   = -frustumSize * aspect / 2;
-            camera.right  =  frustumSize * aspect / 2;
-            camera.top    =  frustumSize / 2;
-            camera.bottom = -frustumSize / 2;
-            camera.updateProjectionMatrix();
-            renderer.setSize(width, height);
-        }
+        // Helper Getters (sama, tapi getNextUpgradeCost sudah dimodifikasi)
+        function getCurrentTier(namaKomponen) { /* ... */ const level = gameState.komponen[namaKomponen].level; const tierData = tiers[namaKomponen].find(t => t.level === level); return tierData || tiers[namaKomponen][tiers[namaKomponen].length - 1]; }
+        function getNextUpgradeCost(namaKomponen) { /* ... (sudah termasuk inflasi) ... */ const levelSaatIni = gameState.komponen[namaKomponen].level; const maxLevel = tiers[namaKomponen].length; if (levelSaatIni >= maxLevel) return Infinity; const config = hargaUpgrade[namaKomponen]; const baseCost = config.baseCost * Math.pow(config.multiplier, levelSaatIni -1); const inflatedCost = baseCost * gameState.inflationMultiplier; return Math.ceil(inflatedCost); }
 
-        // ==========================================
-        // EVENT LISTENERS
-        // ==========================================
-        function setupEventListeners() {
-            // Tombol Upgrade
-            document.getElementById('upgrade-cpu').addEventListener('click', () => upgradeComponent('cpu'));
-            document.getElementById('upgrade-gpu').addEventListener('click', () => upgradeComponent('gpu'));
-            document.getElementById('upgrade-pendingin').addEventListener('click', () => upgradeComponent('pendingin'));
+        // Three.js Globals (sama)
+        let scene, camera, renderer, controls, models = {}, environmentModels = {}, gpuFans = [], aspect, frustumSize = 20;
+        const rigBasePosition = new THREE.Vector3(0.5, 0.8, -0.5);
 
-            // Tombol Exchange
-            document.getElementById('exchange-button').addEventListener('click', () => {
-                // Tukar semua BTC yang tersedia
-                exchangeBTC(gameState.minedBTC);
-            });
-        }
+        // CORE GAME FUNCTIONS (init, gameLoop, updateMarket, updateInflation, updateGameState, exchangeBTC, upgradeComponent - sama)
+        function init() { console.log("Initializing 50 Levels..."); gameState.lastInflationUpdateTime = Date.now(); gameState.lastRateUpdateTime = Date.now(); setupThreeJS(); createEnvironmentModels(); createInitialModels(); initTooltips(); updateUI(); setInterval(gameLoop, 1000); animate(); setupEventListeners(); addLogMessage("Welcome Miner! 50 Tiers await!"); console.log("Ready."); }
+        function gameLoop() { const now = Date.now(); updateMarket(now); updateInflation(now); updateGameState(); }
+        function updateMarket(currentTime) { if (currentTime - gameState.lastRateUpdateTime >= gameState.rateUpdateInterval) { gameState.lastRateUpdateTime = currentTime; gameState.rateTime += gameState.rateUpdateInterval / 1000; const frequency = 0.05; const amplitude = gameState.baseExchangeRate * gameState.rateVolatility; const noise = (Math.random() - 0.5) * 2 * gameState.baseExchangeRate * gameState.rateNoise; let newRate = gameState.baseExchangeRate + Math.sin(gameState.rateTime * frequency) * amplitude + noise; newRate = Math.max(gameState.baseExchangeRate * 0.5, newRate); gameState.lastRate = gameState.btcExchangeRate; gameState.btcExchangeRate = newRate; console.log(`Market Update: BTC Price = ${newRate.toFixed(0)}`); updateUI(); } }
+        function updateInflation(currentTime) { const elapsedMinutes = (currentTime - gameState.lastInflationUpdateTime) / (1000 * 60); if (elapsedMinutes >= 1) { gameState.inflationMultiplier *= (1 + gameState.inflationRatePerMinute * elapsedMinutes); gameState.lastInflationUpdateTime = currentTime; console.log(`Inflation Update: Multiplier = ${gameState.inflationMultiplier.toFixed(4)}`); updateUI(); } }
+        function updateGameState() { const cpuTier = getCurrentTier('cpu'); const gpuTier = getCurrentTier('gpu'); const pendinginTier = getCurrentTier('pendingin'); const psuTier = getCurrentTier('psu'); const totalPower = cpuTier.power + gpuTier.power; gameState.isPowerOverload = totalPower > psuTier.maxPower; const powerWarningElement = document.getElementById('power-warning'); if (powerWarningElement) powerWarningElement.style.display = gameState.isPowerOverload ? 'block' : 'none'; if (gameState.isPowerOverload) { updateUI(0, totalPower); let deltaSuhu = (gameState.suhuAmbient - gameState.komponen.cpu.suhu) * 0.1; gameState.komponen.cpu.suhu += deltaSuhu; gameState.komponen.cpu.suhu = Math.max(gameState.suhuAmbient, gameState.komponen.cpu.suhu); return; } let totalHashrate = cpuTier.hashrate + gpuTier.hashrate; const heatGenerated = cpuTier.heat + gpuTier.heat; const heatDissipated = (gameState.komponen.cpu.suhu - gameState.suhuAmbient) * pendinginTier.dissipation * gameState.pendinginEffectiveness; const deltaSuhu = (heatGenerated - heatDissipated) * 0.05; gameState.komponen.cpu.suhu += deltaSuhu; gameState.komponen.cpu.suhu = Math.max(gameState.suhuAmbient, gameState.komponen.cpu.suhu); gameState.komponen.cpu.suhu = Math.min(110, gameState.komponen.cpu.suhu); const throttlingElement = document.getElementById('throttling-status'); gameState.isThrottling = gameState.komponen.cpu.suhu > gameState.maxTemp; if (throttlingElement) throttlingElement.style.display = gameState.isThrottling ? 'block' : 'none'; if (gameState.isThrottling) { const overheatFactor = (gameState.komponen.cpu.suhu - gameState.maxTemp) / 15; const throttleMultiplier = Math.max(0.1, 1 - overheatFactor); totalHashrate *= throttleMultiplier; } const btcMinedPerSecond = totalHashrate * gameState.hashToBtcRate; gameState.minedBTC += btcMinedPerSecond; updateUI(actualHashrate=totalHashrate, actualPower=totalPower); /* Kirim nilai aktual */ } // Kirim nilai aktual ke updateUI
+        function exchangeBTC(amountToExchange) { if (amountToExchange <= 0 || isNaN(amountToExchange)) { addLogMessage("Invalid amount.", 'error'); return; } if (amountToExchange > gameState.minedBTC) { addLogMessage("Insufficient BTC.", 'error'); return; } const uangGained = amountToExchange * gameState.btcExchangeRate; gameState.minedBTC -= amountToExchange; gameState.uangVirtual += uangGained; addLogMessage(`+$${uangGained.toLocaleString(undefined,{maximumFractionDigits:0})} (from ${amountToExchange.toFixed(8)} BTC @ $${gameState.btcExchangeRate.toFixed(0)}/BTC)`, 'success'); const xpGained = Math.floor(uangGained * gameState.xpPerUangExchanged); addXP(xpGained); updateUI(); }
+        function upgradeComponent(namaKomponen) { const biayaUpgrade = getNextUpgradeCost(namaKomponen); const nextLevel = gameState.komponen[namaKomponen].level + 1; const maxLevel = tiers[namaKomponen].length; if (nextLevel > maxLevel) { addLogMessage(`${namaKomponen.toUpperCase()} MAX!`, 'warning'); return; } if (gameState.uangVirtual >= biayaUpgrade) { gameState.uangVirtual -= biayaUpgrade; gameState.komponen[namaKomponen].level = nextLevel; if (namaKomponen === 'pendingin') { gameState.pendinginEffectiveness = getCurrentTier('pendingin').dissipation; } updateComponentModel3D(namaKomponen, nextLevel); addLogMessage(`Upgrade ${namaKomponen.toUpperCase()} to ${getCurrentTier(namaKomponen).name} success! (-$${biayaUpgrade.toLocaleString()})`, 'success'); updateUI(); } else { addLogMessage(`Insufficient funds ($${biayaUpgrade.toLocaleString()}).`, 'error'); } }
 
-        // ==========================================
-        // MULAI GAME
-        // ==========================================
+        // UI UPDATE FUNCTION (Sama, mengandalkan data tiers baru & getNextUpgradeCost baru)
+        function updateUI(currentHashrate, currentPower) { /* ... (UI update sama seperti sebelumnya, pastikan ID span biaya benar) ... */
+             document.getElementById('player-level').textContent = gameState.playerLevel; const xpPercent = Math.min(100, (gameState.playerXP / gameState.xpToNextLevel) * 100); document.getElementById('xp-bar').style.width = `${xpPercent}%`; document.getElementById('player-xp-text').textContent = `${Math.floor(gameState.playerXP)} / ${gameState.xpToNextLevel} XP`; document.getElementById('uang-virtual').textContent = Math.floor(gameState.uangVirtual).toLocaleString(); document.getElementById('mined-btc').textContent = gameState.minedBTC.toFixed(8); document.getElementById('tech-coin').textContent = gameState.otherCoins.techCoin.toLocaleString(); document.getElementById('rare-coin').textContent = gameState.otherCoins.rareCoin.toLocaleString();
+             const actualHashrate = currentHashrate !== undefined ? currentHashrate : (getCurrentTier('cpu').hashrate + getCurrentTier('gpu').hashrate); document.getElementById('total-hashrate').textContent = actualHashrate.toFixed(1); const actualPower = currentPower !== undefined ? currentPower : (getCurrentTier('cpu').power + getCurrentTier('gpu').power); document.getElementById('total-power').textContent = actualPower.toFixed(0); document.getElementById('max-power').textContent = getCurrentTier('psu').maxPower.toFixed(0); const tempElement = document.getElementById('suhu-cpu'); const tempBar = document.getElementById('temp-bar'); const currentTemp = gameState.komponen.cpu.suhu; tempElement.textContent = currentTemp.toFixed(1); tempElement.className = 'font-bold text-lg '; if (currentTemp > gameState.maxTemp + 5) tempElement.classList.add('temp-overheat'); else if (currentTemp > gameState.maxTemp * 0.85) tempElement.classList.add('temp-hot'); else if (currentTemp > gameState.maxTemp * 0.6) tempElement.classList.add('temp-warm'); else tempElement.classList.add('temp-cool'); const tempPercent = Math.min(100, (currentTemp / (gameState.maxTemp + 10)) * 100); tempBar.style.width = `${tempPercent}%`; if (currentTemp > gameState.maxTemp) tempBar.style.backgroundColor = '#ef4444'; else if (currentTemp > gameState.maxTemp * 0.8) tempBar.style.backgroundColor = '#f87171'; else if (currentTemp > gameState.maxTemp * 0.6) tempBar.style.backgroundColor = '#fbbf24'; else tempBar.style.backgroundColor = '#34d399';
+             const exchangeRateElement = document.getElementById('exchange-rate'); const priceTrendElement = document.getElementById('price-trend'); exchangeRateElement.textContent = gameState.btcExchangeRate.toLocaleString(undefined, {maximumFractionDigits: 0}); document.getElementById('exchange-available-btc').textContent = gameState.minedBTC.toFixed(8); document.getElementById('exchange-button').disabled = gameState.minedBTC < 0.00000001; priceTrendElement.className = 'ml-1'; if (gameState.btcExchangeRate > gameState.lastRate) { priceTrendElement.textContent = '↑'; priceTrendElement.classList.add('price-up'); } else if (gameState.btcExchangeRate < gameState.lastRate) { priceTrendElement.textContent = '↓'; priceTrendElement.classList.add('price-down'); } else { priceTrendElement.textContent = '→'; priceTrendElement.classList.add('price-stable'); }
+            ['cpu', 'gpu', 'pendingin', 'psu'].forEach(comp => { const btn = document.getElementById(`upgrade-${comp}`); const level = gameState.komponen[comp].level; const maxLevel = tiers[comp].length; const currentTierInfo = tiers[comp][level - 1] || tiers[comp][maxLevel - 1]; const nameSpan = btn.querySelector('.component-name'); const costSpan = btn.querySelector('#biaya-' + comp); nameSpan.textContent = `${currentTierInfo.name} (Lvl ${level})`; if (level < maxLevel) { const biaya = getNextUpgradeCost(comp); if (costSpan) costSpan.textContent = biaya.toLocaleString(); btn.disabled = gameState.uangVirtual < biaya; const nextTierInfo = tiers[comp][level]; if (nextTierInfo) { btn._tippy?.setContent(`Upgrade ke: ${nextTierInfo.name} ($${biaya.toLocaleString()})`); } } else { nameSpan.textContent = `${currentTierInfo.name} (MAX)`; if (costSpan) costSpan.textContent = "MAX"; btn.disabled = true; btn._tippy?.setContent(`${currentTierInfo.name} (Level Maksimum)`); } });
+         }
+
+        function addLogMessage(message, type = 'info') { /* ... (sama) ... */ const logArea = document.getElementById('log-area'); if (!logArea) return; const newMessage = document.createElement('p'); newMessage.textContent = `[${new Date().toLocaleTimeString('id-ID',{ hour: '2-digit', minute: '2-digit', second:'2-digit' })}] ${message}`; let textColor = 'text-gray-300'; switch (type) { case 'success': textColor = 'text-green-400'; break; case 'warning': textColor = 'text-yellow-400'; break; case 'error': textColor = 'text-red-400'; break; case 'xp': textColor = 'text-cyan-400'; break; case 'levelup': textColor = 'text-fuchsia-400 font-bold'; break; case 'reward': textColor = 'text-lime-400'; break; } newMessage.className = textColor; logArea.appendChild(newMessage); logArea.scrollTop = logArea.scrollHeight; const maxLogs = 60; if (logArea.children.length > maxLogs) { logArea.removeChild(logArea.firstChild); } }
+
+        // THREE.JS FUNCTIONS (Sama)
+        function setupThreeJS() { /* ... */ const container = document.getElementById('canvas-container'); if (!container) return; scene = new THREE.Scene(); scene.background = new THREE.Color(0x1f2937); aspect = container.clientWidth / container.clientHeight; frustumSize = 20; camera = new THREE.OrthographicCamera(frustumSize * aspect / -2, frustumSize * aspect / 2, frustumSize / 2, frustumSize / -2, 0.1, 1000); const camDistance = 19; camera.position.set(camDistance, camDistance * 0.9, camDistance); const lookAtPosition = new THREE.Vector3(0, 1.0, -0.5); camera.lookAt(lookAtPosition); camera.updateProjectionMatrix(); renderer = new THREE.WebGLRenderer({ antialias: true }); renderer.setSize(container.clientWidth, container.clientHeight); renderer.setPixelRatio(window.devicePixelRatio); renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFSoftShadowMap; container.appendChild(renderer.domElement); const loadingIndicator = document.getElementById('loading-indicator'); if (loadingIndicator) loadingIndicator.remove(); const ambientLight = new THREE.AmbientLight(0xcccccc, 0.7); scene.add(ambientLight); const directionalLight = new THREE.DirectionalLight(0xffffff, 1.0); directionalLight.position.set(20, 30, 20); directionalLight.target.position.copy(lookAtPosition); directionalLight.castShadow = true; directionalLight.shadow.mapSize.width = 1024; directionalLight.shadow.mapSize.height = 1024; directionalLight.shadow.camera.near = 0.5; directionalLight.shadow.camera.far = 100; directionalLight.shadow.camera.left = -frustumSize; directionalLight.shadow.camera.right = frustumSize; directionalLight.shadow.camera.top = frustumSize; directionalLight.shadow.camera.bottom = -frustumSize; scene.add(directionalLight); scene.add(directionalLight.target); controls = new THREE.OrbitControls(camera, renderer.domElement); controls.enableDamping = true; controls.dampingFactor = 0.05; controls.screenSpacePanning = true; controls.target.copy(lookAtPosition); controls.maxPolarAngle = Math.PI / 1.9; controls.minZoom = 0.4; controls.maxZoom = 3; controls.update(); window.addEventListener('resize', onWindowResize, false); }
+        function createEnvironmentModels() { /* ... */ const floorSize = 25; const floorGeo = new THREE.PlaneGeometry(floorSize, floorSize); const floorMat = new THREE.MeshStandardMaterial({ color: 0x44444f, roughness: 0.8 }); const floor = new THREE.Mesh(floorGeo, floorMat); floor.rotation.x = -Math.PI / 2; floor.position.y = 0; floor.receiveShadow = true; scene.add(floor); const wallHeight = 10; const wallThickness = 0.2; const wallMat = new THREE.MeshStandardMaterial({ color: 0x374151, roughness: 0.9 }); const wallBackGeo = new THREE.BoxGeometry(floorSize + wallThickness, wallHeight, wallThickness); const wallLeftGeo = new THREE.BoxGeometry(wallThickness, wallHeight, floorSize + wallThickness); const wallBack = new THREE.Mesh(wallBackGeo, wallMat); const wallLeft = new THREE.Mesh(wallLeftGeo, wallMat); wallBack.position.set(0, wallHeight / 2, -floorSize / 2); wallLeft.position.set(-floorSize / 2, wallHeight / 2, 0); wallBack.receiveShadow = true; wallLeft.receiveShadow = true; scene.add(wallBack); scene.add(wallLeft); const deskHeight = 0.8; const deskWidth = 4; const deskDepth = 2; const deskGeo = new THREE.BoxGeometry(deskWidth, deskHeight, deskDepth); const deskMat = new THREE.MeshStandardMaterial({ color: 0x8B4513, roughness: 0.7, metalness: 0.1 }); const desk = new THREE.Mesh(deskGeo, deskMat); desk.position.y = deskHeight / 2; desk.castShadow = true; desk.receiveShadow = true; scene.add(desk); environmentModels['desk'] = desk; const chairSeatGeo = new THREE.BoxGeometry(1, 0.2, 1); const chairBackGeo = new THREE.BoxGeometry(1, 1.2, 0.2); const chairLegGeo = new THREE.CylinderGeometry(0.05, 0.05, deskHeight * 0.5, 8); const chairMat = new THREE.MeshStandardMaterial({ color: 0x404040, roughness: 0.7 }); const chairGroup = new THREE.Group(); const chairSeat = new THREE.Mesh(chairSeatGeo, chairMat); const chairBack = new THREE.Mesh(chairBackGeo, chairMat); chairSeat.position.y = deskHeight * 0.5 + 0.2/2; chairBack.position.set(0, chairSeat.position.y + 1.2 / 2 - 0.1, -1/2 + 0.2/2); for (let i = 0; i < 4; i++) { const leg = new THREE.Mesh(chairLegGeo, chairMat); leg.position.set((i % 2 === 0 ? -0.4 : 0.4), deskHeight * 0.25, (i < 2 ? -0.4 : 0.4)); chairGroup.add(leg); } chairGroup.add(chairSeat); chairGroup.add(chairBack); chairGroup.position.set(0, 0, deskDepth / 2 + 0.6); chairGroup.traverse(child => { if (child.isMesh) { child.castShadow = true; child.receiveShadow = true; } }); scene.add(chairGroup); environmentModels['chair'] = chairGroup; const charBodyGeo = new THREE.BoxGeometry(0.6, 0.9, 0.5); const charHeadGeo = new THREE.SphereGeometry(0.3, 16, 16); const charBodyMat = new THREE.MeshStandardMaterial({ color: 0xADD8E6 }); const charHeadMat = new THREE.MeshStandardMaterial({ color: 0xADD8E6 }); const charBody = new THREE.Mesh(charBodyGeo, charBodyMat); const charHead = new THREE.Mesh(charHeadGeo, charHeadMat); charBody.position.set(0, deskHeight * 0.5 + 0.2/2 + 0.9/2, 0); charHead.position.set(0, charBody.position.y + 0.9/2 + 0.3, 0); charBody.castShadow = true; charHead.castShadow = true; chairGroup.add(charBody); chairGroup.add(charHead); environmentModels['characterBody'] = charBody; environmentModels['characterHead'] = charHead; const monitorScreenGeo = new THREE.BoxGeometry(1.5, 0.9, 0.1); const monitorStandGeo = new THREE.BoxGeometry(0.3, 0.2, 0.3); const monitorMat = new THREE.MeshStandardMaterial({ color: 0x1a1a1a, roughness: 0.2 }); const monitorScreen = new THREE.Mesh(monitorScreenGeo, monitorMat); const monitorStand = new THREE.Mesh(monitorStandGeo, monitorMat); monitorStand.position.set(0, deskHeight + 0.2/2, -deskDepth / 2 + 0.5); monitorScreen.position.set(monitorStand.position.x, monitorStand.position.y + 0.2/2 + 0.9/2, monitorStand.position.z); monitorScreen.castShadow = true; monitorScreen.receiveShadow = true; monitorStand.castShadow = true; monitorStand.receiveShadow = true; scene.add(monitorStand); scene.add(monitorScreen); environmentModels['monitorScreen'] = monitorScreen; environmentModels['monitorStand'] = monitorStand; const keybGeo = new THREE.BoxGeometry(1.2, 0.05, 0.4); const keybMat = new THREE.MeshStandardMaterial({color: 0x222222}); const keyboard = new THREE.Mesh(keybGeo, keybMat); keyboard.position.set(0, deskHeight + 0.05/2, 0.3); keyboard.castShadow = true; scene.add(keyboard); environmentModels['keyboard'] = keyboard; const mouseGeo = new THREE.BoxGeometry(0.15, 0.06, 0.25); const mouseMat = new THREE.MeshStandardMaterial({color: 0x252525}); const mouse = new THREE.Mesh(mouseGeo, mouseMat); mouse.position.set(0.8, deskHeight + 0.06/2, 0.3); mouse.castShadow = true; scene.add(mouse); environmentModels['mouse'] = mouse; rigBasePosition.y = deskHeight; }
+        function createInitialModels() { /* ... */ const moboWidth = 1.8; const moboDepth = 1.2; const moboGeo = new THREE.BoxGeometry(moboWidth, 0.05, moboDepth); const moboMat = new THREE.MeshStandardMaterial({ color: 0x005540, roughness: 0.6 }); const motherboard = new THREE.Mesh(moboGeo, moboMat); motherboard.position.set(rigBasePosition.x, rigBasePosition.y + 0.05 / 2, rigBasePosition.z); motherboard.castShadow = true; motherboard.receiveShadow = true; scene.add(motherboard); models['motherboard'] = motherboard; updateComponentModel3D('cpu', gameState.komponen.cpu.level); updateComponentModel3D('gpu', gameState.komponen.gpu.level); updateComponentModel3D('pendingin', gameState.komponen.pendingin.level); updateComponentModel3D('psu', gameState.komponen.psu.level); }
+        function updateComponentModel3D(namaKomponen, levelBaru) { /* ... */ if (!models['motherboard']) return; const moboPos = models['motherboard'].position; const moboTopY = moboPos.y + 0.05 / 2; if (models[namaKomponen]) { scene.remove(models[namaKomponen]); models[namaKomponen].traverse(child => { if (child.isMesh) { if (child.geometry) child.geometry.dispose(); if (child.material) { if (Array.isArray(child.material)) { child.material.forEach(m => m.dispose()); } else { child.material.dispose(); } } } }); delete models[namaKomponen]; } if (namaKomponen === 'gpu') { gpuFans = []; } const tierData = tiers[namaKomponen][levelBaru - 1] || tiers[namaKomponen][tiers[namaKomponen].length - 1]; let componentGroup = new THREE.Group(); let position = { x: moboPos.x, y: moboTopY, z: moboPos.z }; const scale = 0.18; switch (namaKomponen) { case 'cpu': const cpuSize = scale * (1 + (levelBaru - 1) * 0.08); const cpuGeo = new THREE.BoxGeometry(cpuSize, 0.1, cpuSize); const cpuMat = new THREE.MeshStandardMaterial({ color: tierData.color, roughness: 0.6 }); const cpuMesh = new THREE.Mesh(cpuGeo, cpuMat); cpuMesh.position.y = 0.1 / 2; componentGroup.add(cpuMesh); position.z += 0.25; break; case 'gpu': const gpuLength = 0.8 * (1 + (levelBaru - 1) * 0.12); const gpuHeight = 0.25 * (1 + (levelBaru - 1) * 0.03); const gpuWidth = 0.18; const gpuBodyGeo = new THREE.BoxGeometry(gpuWidth, gpuHeight, gpuLength); const gpuMat = new THREE.MeshStandardMaterial({ color: tierData.color, metalness: 0.2, roughness: 0.5 }); const gpuBody = new THREE.Mesh(gpuBodyGeo, gpuMat); gpuBody.position.y = gpuHeight / 2; componentGroup.add(gpuBody); if (tierData.fans > 0) { const fanRadius = gpuHeight * 0.4; const fanGeo = new THREE.CylinderGeometry(fanRadius, fanRadius, 0.05, 16); const fanMat = new THREE.MeshStandardMaterial({ color: 0x111111 }); for (let i = 0; i < tierData.fans; i++) { const fan = new THREE.Mesh(fanGeo, fanMat); fan.rotation.z = Math.PI / 2; fan.position.set(gpuWidth/2 + 0.025, gpuBody.position.y, (gpuLength / (tierData.fans + 1)) * (i + 1) - gpuLength/2); componentGroup.add(fan); gpuFans.push(fan); } } componentGroup.rotation.y = Math.PI / 2; position.z -= 0.3; break; case 'pendingin': if (models['cpu']) { const cpuModel = models['cpu'].children[0]; const cpuTopY = cpuModel.position.y + 0.1 / 2; let coolerHeight = 0; const coolerBaseSize = scale * 1.1 * (1 + (levelBaru-1)*0.05); const coolerMat = new THREE.MeshStandardMaterial({ color: tierData.color, metalness: 0.3, roughness: 0.4 }); if (levelBaru <= 25) { coolerHeight = 0.3 + (levelBaru - 1) * 0.05; const coolerGeo = new THREE.BoxGeometry(coolerBaseSize, coolerHeight, coolerBaseSize * 0.8); const coolerMesh = new THREE.Mesh(coolerGeo, coolerMat); coolerMesh.position.y = cpuTopY + coolerHeight / 2; componentGroup.add(coolerMesh); const finHeight = coolerHeight * 0.8; const finGeo = new THREE.BoxGeometry(coolerBaseSize * 1.1, finHeight, 0.02); const finMat = new THREE.MeshStandardMaterial({ color: 0xAAAAAA, metalness: 0.7 }); const finCount = Math.min(10, 3 + Math.floor(levelBaru/3)); for(let i=0; i< finCount ; i++) { const fin = new THREE.Mesh(finGeo, finMat); fin.position.set(0, cpuTopY + finHeight/2 + 0.05, (i - Math.floor(finCount/2))* (coolerBaseSize*0.8 / finCount) * 0.8 ); componentGroup.add(fin); } } else { coolerHeight = 0.5 + (levelBaru - 26) * 0.03; const coolerGeo = new THREE.BoxGeometry(coolerBaseSize * 1.2, coolerHeight, coolerBaseSize * 1.2); const coolerMesh = new THREE.Mesh(coolerGeo, coolerMat); coolerMesh.position.y = cpuTopY + coolerHeight / 2; componentGroup.add(coolerMesh); } position = models['cpu'].position.clone(); } else { return; } break; case 'psu': const psuSize = scale * 2.5 * (1 + (levelBaru - 1)*0.04); const psuHeight = scale * 1.2 * (1 + (levelBaru - 1)*0.04); const psuGeo = new THREE.BoxGeometry(psuSize, psuHeight, psuSize * 1.5); const psuMat = new THREE.MeshStandardMaterial({ color: tierData.color, metalness: 0.1, roughness: 0.7 }); const psuMesh = new THREE.Mesh(psuGeo, psuMat); psuMesh.position.y = psuHeight / 2; componentGroup.add(psuMesh); position.x -= (1.8/4 + psuSize/2); position.z -= (1.2/4 + (psuSize*1.5)/2); break; default: return; } componentGroup.traverse(child => { if (child.isMesh) { child.castShadow = true; } }); componentGroup.position.set(position.x, position.y, position.z); scene.add(componentGroup); models[namaKomponen] = componentGroup; }
+        function animate() { requestAnimationFrame(animate); const delta = 0.016; if (gpuFans.length > 0 && !gameState.isPowerOverload) { const rotationSpeed = gameState.isThrottling ? 1 : 4 + Math.log10(gameState.komponen.gpu.level); /* Kipas lebih cepat di level tinggi */ gpuFans.forEach(fan => { fan.rotation.y += rotationSpeed * delta * 10; }); } if (controls) controls.update(); renderer.render(scene, camera); }
+        function onWindowResize() { /* ... */ const container = document.getElementById('canvas-container'); if (!container || !camera || !renderer) return; const width = container.clientWidth; const height = container.clientHeight; aspect = width / height; camera.left = -frustumSize * aspect / 2; camera.right = frustumSize * aspect / 2; camera.top = frustumSize / 2; camera.bottom = -frustumSize / 2; camera.updateProjectionMatrix(); renderer.setSize(width, height); }
+
+        // CUSTOMIZATION & TOOLTIPS (Sama)
+        function changeCharacterColor(colorHex) { if (environmentModels['characterBody'] && environmentModels['characterHead']) { environmentModels['characterBody'].material.color.setHex(colorHex); environmentModels['characterHead'].material.color.setHex(colorHex); } }
+        function changeDeskColor(colorHex) { if (environmentModels['desk']) { environmentModels['desk'].material.color.setHex(colorHex); } }
+        function initTooltips() { tippy('[data-tippy-content]', { theme: 'custom', arrow: true, animation: 'fade', placement: 'top-start', }); }
+
+        // EVENT LISTENERS (Sama)
+        function setupEventListeners() { document.getElementById('upgrade-cpu').addEventListener('click', () => upgradeComponent('cpu')); document.getElementById('upgrade-gpu').addEventListener('click', () => upgradeComponent('gpu')); document.getElementById('upgrade-pendingin').addEventListener('click', () => upgradeComponent('pendingin')); document.getElementById('upgrade-psu').addEventListener('click', () => upgradeComponent('psu')); document.getElementById('exchange-button').addEventListener('click', () => exchangeBTC(gameState.minedBTC)); }
+
+        // START GAME
         document.addEventListener('DOMContentLoaded', init);
 
     </script>
 
 </body>
-</html>
+    </html>
